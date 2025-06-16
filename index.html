@@ -26,15 +26,15 @@
       font-size: 1.8rem;
       font-weight: bold;
       display: flex;
-      align-items: center;
       justify-content: space-between;
+      align-items: center;
     }
 
     .menu-btn {
-      background: transparent;
+      background: none;
       border: none;
+      font-size: 1.8rem;
       color: white;
-      font-size: 1.5rem;
       cursor: pointer;
       display: none;
     }
@@ -75,20 +75,38 @@
     }
 
     .sidebar ul li {
+      margin: 6px 0;
+    }
+
+    .folder-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       padding: 8px 10px;
       cursor: pointer;
       color: #0d6efd;
       border-radius: 5px;
-      margin: 6px 0;
-      transition: 0.3s;
+      font-weight: bold;
     }
 
-    .sidebar ul li:hover {
+    .folder-label:hover {
       background-color: #e7f1ff;
       color: #1e3a8a;
     }
 
-    .sidebar ul li.active {
+    .submenu li {
+      padding: 8px 10px;
+      cursor: pointer;
+      color: #0d6efd;
+      border-radius: 5px;
+    }
+
+    .submenu li:hover {
+      background-color: #e7f1ff;
+      color: #1e3a8a;
+    }
+
+    .submenu li.active {
       background-color: #1e3a8a;
       color: #fff;
       font-weight: bold;
@@ -97,6 +115,7 @@
     .submenu {
       margin-left: 15px;
       margin-top: 5px;
+      display: none;
     }
 
     .main {
@@ -143,6 +162,7 @@
         top: 66px;
         height: calc(100vh - 66px);
         z-index: 10;
+        background-color: white;
       }
 
       .sidebar.active {
@@ -169,11 +189,14 @@
       </div>
 
       <ul id="docList">
-        <li>📂 P&ID
+        <li>
+          <div class="folder-label" onclick="toggleSubmenu(this)">
+            📂 P&ID <span class="arrow">▶️</span>
+          </div>
           <ul class="submenu">
-            <li onclick="loadPDF('E-182b%20%28reac%29.pdf', 'Reactor P&ID', this)">📄 Reactor P&ID</li>
-            <li onclick="loadPDF('furnace.pdf', 'Furnace P&ID', this)">📄 Furnace P&ID</li>
-            <li onclick="loadPDF('fractionator.pdf', 'Fractionator P&ID', this)">📄 Fractionator P&ID</li>
+            <li onclick="loadPDF('E-182b%20(reac).pdf', 'P&ID 1 - Reactor', this)">📄 P&ID 1 - Reactor</li>
+            <li onclick="loadPDF('furnace.pdf', 'P&ID 2 - Furnace', this)">📄 P&ID 2 - Furnace</li>
+            <li onclick="loadPDF('fractionator.pdf', 'P&ID 3 - Fractionator', this)">📄 P&ID 3 - Fractionator</li>
           </ul>
         </li>
         <li onclick="loadPDF('layout.pdf', 'Equipment Layout', this)">📄 Equipment Layout</li>
@@ -182,9 +205,9 @@
     </aside>
 
     <main class="main">
-      <h2 id="docTitle">📄 Reactor P&ID</h2>
+      <h2 id="docTitle">📄 P&ID 1 - Reactor</h2>
       <div class="viewer-container">
-        <iframe id="pdfFrame" src="E-182b%20%28reac%29.pdf"></iframe>
+        <iframe id="pdfFrame" src="E-182b%20(reac).pdf"></iframe>
       </div>
     </main>
   </div>
@@ -194,17 +217,18 @@
       document.getElementById('pdfFrame').src = file;
       document.getElementById('docTitle').innerText = "📄 " + title;
 
-      const allItems = document.querySelectorAll('#docList li');
+      const allItems = document.querySelectorAll('#docList li ul li');
       allItems.forEach(item => item.classList.remove('active'));
-      element.classList.add('active');
+      if (element) {
+        element.classList.add('active');
+      }
 
-      // Close sidebar on mobile
       document.getElementById('sidebar').classList.remove('active');
     }
 
     function filterList() {
       const filter = document.getElementById('searchInput').value.toLowerCase();
-      const items = document.querySelectorAll('#docList li');
+      const items = document.querySelectorAll('#docList li ul li, #docList > li');
 
       items.forEach(item => {
         const text = item.textContent.toLowerCase();
@@ -216,7 +240,19 @@
       });
     }
 
-    // Sidebar toggle for small screens
+    function toggleSubmenu(folderDiv) {
+      const submenu = folderDiv.nextElementSibling;
+      const arrow = folderDiv.querySelector('.arrow');
+
+      if (submenu.style.display === 'block') {
+        submenu.style.display = 'none';
+        arrow.textContent = '▶️';
+      } else {
+        submenu.style.display = 'block';
+        arrow.textContent = '▼';
+      }
+    }
+
     document.getElementById('toggleSidebar').addEventListener('click', function () {
       document.getElementById('sidebar').classList.toggle('active');
     });
