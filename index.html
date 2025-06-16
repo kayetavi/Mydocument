@@ -25,7 +25,6 @@
       padding: 18px 30px;
       font-size: 1.8rem;
       font-weight: bold;
-      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
     }
 
     .container {
@@ -35,10 +34,10 @@
 
     .sidebar {
       width: 260px;
-      background: #ffffff;
+      background: #fff;
       border-right: 1px solid #e0e0e0;
-      padding: 25px 20px;
-      box-shadow: 2px 0 4px rgba(0, 0, 0, 0.05);
+      padding: 20px;
+      overflow-y: auto;
     }
 
     .sidebar h2 {
@@ -49,56 +48,64 @@
       padding-bottom: 5px;
     }
 
-    .search-box {
-      margin-bottom: 15px;
-    }
-
     .search-box input {
       width: 100%;
       padding: 8px;
+      margin-bottom: 15px;
       border: 1px solid #ccc;
       border-radius: 6px;
-      font-size: 1rem;
     }
 
     .sidebar ul {
       list-style: none;
       padding-left: 0;
-      max-height: 70vh;
-      overflow-y: auto;
     }
 
     .sidebar ul li {
-      margin: 12px 0;
-      color: #0d6efd;
-      font-size: 1rem;
+      padding: 8px 10px;
       cursor: pointer;
-      transition: 0.3s;
-      padding: 5px 10px;
+      color: #0d6efd;
       border-radius: 5px;
+      margin: 6px 0;
+      transition: 0.3s;
     }
 
     .sidebar ul li:hover {
-      background: #e7f1ff;
+      background-color: #e7f1ff;
       color: #1e3a8a;
     }
 
     .sidebar ul li.active {
       background-color: #1e3a8a;
-      color: white;
+      color: #fff;
       font-weight: bold;
+    }
+
+    .submenu {
+      margin-left: 15px;
+      margin-top: 5px;
     }
 
     .main {
       flex: 1;
       padding: 25px;
       background-color: #f9fafc;
+      display: flex;
+      flex-direction: column;
     }
 
     .main h2 {
       color: #1e3a8a;
-      font-size: 1.6rem;
-      margin-bottom: 20px;
+      font-size: 1.4rem;
+      margin-bottom: 10px;
+    }
+
+    .viewer-container {
+      flex: 1;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 5px 10px rgba(0,0,0,0.05);
+      padding: 15px;
     }
 
     iframe {
@@ -106,7 +113,6 @@
       height: calc(100vh - 180px);
       border: none;
       border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
 
     @media (max-width: 768px) {
@@ -116,8 +122,6 @@
 
       .sidebar {
         width: 100%;
-        border-right: none;
-        border-bottom: 1px solid #ccc;
       }
 
       iframe {
@@ -141,31 +145,38 @@
       </div>
 
       <ul id="docList">
-        <li class="active" onclick="loadPDF('E-182b%20r2%20(reac).pdf', this)">📄 P&ID</li>
-        <li onclick="loadPDF('example2.pdf', this)">📄 Equipment Layout</li>
-        <li onclick="loadPDF('example3.pdf', this)">📄 Line List</li>
-        <li onclick="loadPDF('example4.pdf', this)">📄 Valve List</li>
-        <li onclick="loadPDF('example5.pdf', this)">📄 Safety Instruction</li>
+        <li>📂 P&ID
+          <ul class="submenu">
+            <li onclick="loadPDF('reactor.pdf', 'Reactor P&ID', this)">📄 Reactor P&ID</li>
+            <li onclick="loadPDF('furnace.pdf', 'Furnace P&ID', this)">📄 Furnace P&ID</li>
+            <li onclick="loadPDF('fractionator.pdf', 'Fractionator P&ID', this)">📄 Fractionator P&ID</li>
+          </ul>
+        </li>
+        <li onclick="loadPDF('layout.pdf', 'Equipment Layout', this)">📄 Equipment Layout</li>
+        <li onclick="loadPDF('line-list.pdf', 'Line List', this)">📄 Line List</li>
       </ul>
     </aside>
 
     <main class="main">
-      <h2>📄 Documents</h2>
-      <iframe id="pdfFrame" src="E-182b%20r2%20(reac).pdf"></iframe>
+      <h2 id="docTitle">📄 Reactor P&ID</h2>
+      <div class="viewer-container">
+        <iframe id="pdfFrame" src="reactor.pdf"></iframe>
+      </div>
     </main>
   </div>
 
   <script>
-    function loadPDF(pdfFile, element) {
-      document.getElementById('pdfFrame').src = pdfFile;
-      const items = document.querySelectorAll('#docList li');
-      items.forEach(item => item.classList.remove('active'));
+    function loadPDF(file, title, element) {
+      document.getElementById('pdfFrame').src = file;
+      document.getElementById('docTitle').innerText = "📄 " + title;
+
+      const allItems = document.querySelectorAll('#docList li');
+      allItems.forEach(item => item.classList.remove('active'));
       element.classList.add('active');
     }
 
     function filterList() {
-      const input = document.getElementById('searchInput');
-      const filter = input.value.toLowerCase();
+      const filter = document.getElementById('searchInput').value.toLowerCase();
       const items = document.querySelectorAll('#docList li');
 
       items.forEach(item => {
@@ -173,7 +184,7 @@
         if (text.includes(filter)) {
           item.style.display = '';
         } else {
-          item.style.display = 'none';
+          if (!item.querySelector('ul')) item.style.display = 'none';
         }
       });
     }
