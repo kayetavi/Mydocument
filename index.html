@@ -46,8 +46,8 @@
 
     .sidebar {
       width: 260px;
-      background: #fff;
-      border-right: 1px solid #e0e0e0;
+      background: #e0f2fe;
+      border-right: 1px solid #cbd5e1;
       padding: 20px;
       overflow-y: auto;
       transition: left 0.3s ease;
@@ -57,7 +57,7 @@
       font-size: 1.4rem;
       color: #1e3a8a;
       margin-bottom: 15px;
-      border-bottom: 1px solid #ccc;
+      border-bottom: 1px solid #93c5fd;
       padding-bottom: 5px;
     }
 
@@ -84,31 +84,33 @@
       justify-content: space-between;
       padding: 8px 10px;
       cursor: pointer;
-      color: #0d6efd;
+      background-color: #dbeafe;
+      color: #1d4ed8;
       border-radius: 5px;
       font-weight: bold;
+      transition: background 0.2s;
     }
 
     .folder-label:hover {
-      background-color: #e7f1ff;
-      color: #1e3a8a;
+      background-color: #bfdbfe;
     }
 
     .submenu li {
       padding: 8px 10px;
       cursor: pointer;
-      color: #0d6efd;
+      color: #1e40af;
       border-radius: 5px;
+      background-color: #f0f9ff;
+      margin: 2px 0;
     }
 
     .submenu li:hover {
-      background-color: #e7f1ff;
-      color: #1e3a8a;
+      background-color: #e0f2fe;
     }
 
     .submenu li.active {
       background-color: #1e3a8a;
-      color: #fff;
+      color: white;
       font-weight: bold;
     }
 
@@ -162,7 +164,6 @@
         top: 66px;
         height: calc(100vh - 66px);
         z-index: 10;
-        background-color: white;
       }
 
       .sidebar.active {
@@ -189,25 +190,46 @@
       </div>
 
       <ul id="docList">
+        <!-- P&ID Folder -->
         <li>
           <div class="folder-label" onclick="toggleSubmenu(this)">
             📂 P&ID <span class="arrow">▶️</span>
           </div>
           <ul class="submenu">
-            <li onclick="loadPDF('E-182b%20(reac).pdf', 'P&ID 1 - Reactor', this)">📄 P&ID 1 - Reactor</li>
+            <li onclick="loadPDF('E-182b (reac).pdf', 'P&ID 1 - Reactor', this)">📄 P&ID 1 - Reactor</li>
             <li onclick="loadPDF('furnace.pdf', 'P&ID 2 - Furnace', this)">📄 P&ID 2 - Furnace</li>
             <li onclick="loadPDF('fractionator.pdf', 'P&ID 3 - Fractionator', this)">📄 P&ID 3 - Fractionator</li>
           </ul>
         </li>
-        <li onclick="loadPDF('layout.pdf', 'Equipment Layout', this)">📄 Equipment Layout</li>
-        <li onclick="loadPDF('line-list.pdf', 'Line List', this)">📄 Line List</li>
+
+        <!-- GAD Folder -->
+        <li>
+          <div class="folder-label" onclick="toggleSubmenu(this)">
+            📂 GAD <span class="arrow">▶️</span>
+          </div>
+          <ul class="submenu">
+            <li onclick="loadPDF('gad1.pdf', 'GAD 1 - Overview', this)">📄 GAD 1 - Overview</li>
+            <li onclick="loadPDF('gad2.pdf', 'GAD 2 - Structural', this)">📄 GAD 2 - Structural</li>
+          </ul>
+        </li>
+
+        <!-- Other Files Folder -->
+        <li>
+          <div class="folder-label" onclick="toggleSubmenu(this)">
+            📂 Other Files <span class="arrow">▶️</span>
+          </div>
+          <ul class="submenu">
+            <li onclick="loadPDF('layout.pdf', 'Equipment Layout', this)">📄 Equipment Layout</li>
+            <li onclick="loadPDF('line-list.pdf', 'Line List', this)">📄 Line List</li>
+          </ul>
+        </li>
       </ul>
     </aside>
 
     <main class="main">
       <h2 id="docTitle">📄 P&ID 1 - Reactor</h2>
       <div class="viewer-container">
-        <iframe id="pdfFrame" src="E-182b%20(reac).pdf"></iframe>
+        <iframe id="pdfFrame" src="E-182b (reac).pdf"></iframe>
       </div>
     </main>
   </div>
