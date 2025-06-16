@@ -1,183 +1,225 @@
-<!DOCTYPE html>  <html lang="en">  
-<head>  
-  <meta charset="UTF-8" />  
-  <title>Documents Dashboard</title>  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />  
-  <style>  
-    * {  
-      margin: 0;  
-      padding: 0;  
-      box-sizing: border-box;  
-      font-family: 'Segoe UI', sans-serif;  
-    }  body {  
-  display: flex;  
-  flex-direction: column;  
-  height: 100vh;  
-  background: #f6f8fc;  
-}  
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Documents Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
 
-header {  
-  background-color: #1e3a8a;  
-  color: white;  
-  padding: 18px 30px;  
-  font-size: 1.8rem;  
-  font-weight: bold;  
-}  
+    body {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      background: #f6f8fc;
+    }
 
-.container {  
-  display: flex;  
-  flex: 1;  
-}  
+    header {
+      background-color: #1e3a8a;
+      color: white;
+      padding: 18px 30px;
+      font-size: 1.8rem;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
 
-.sidebar {  
-  width: 260px;  
-  background: #fff;  
-  border-right: 1px solid #e0e0e0;  
-  padding: 20px;  
-  overflow-y: auto;  
-}  
+    .menu-btn {
+      background: transparent;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      display: none;
+    }
 
-.sidebar h2 {  
-  font-size: 1.4rem;  
-  color: #1e3a8a;  
-  margin-bottom: 15px;  
-  border-bottom: 1px solid #ccc;  
-  padding-bottom: 5px;  
-}  
+    .container {
+      display: flex;
+      flex: 1;
+    }
 
-.search-box input {  
-  width: 100%;  
-  padding: 8px;  
-  margin-bottom: 15px;  
-  border: 1px solid #ccc;  
-  border-radius: 6px;  
-}  
+    .sidebar {
+      width: 260px;
+      background: #fff;
+      border-right: 1px solid #e0e0e0;
+      padding: 20px;
+      overflow-y: auto;
+      transition: left 0.3s ease;
+    }
 
-.sidebar ul {  
-  list-style: none;  
-  padding-left: 0;  
-}  
+    .sidebar h2 {
+      font-size: 1.4rem;
+      color: #1e3a8a;
+      margin-bottom: 15px;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 5px;
+    }
 
-.sidebar ul li {  
-  padding: 8px 10px;  
-  cursor: pointer;  
-  color: #0d6efd;  
-  border-radius: 5px;  
-  margin: 6px 0;  
-  transition: 0.3s;  
-}  
+    .search-box input {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
 
-.sidebar ul li:hover {  
-  background-color: #e7f1ff;  
-  color: #1e3a8a;  
-}  
+    .sidebar ul {
+      list-style: none;
+      padding-left: 0;
+    }
 
-.sidebar ul li.active {  
-  background-color: #1e3a8a;  
-  color: #fff;  
-  font-weight: bold;  
-}  
+    .sidebar ul li {
+      padding: 8px 10px;
+      cursor: pointer;
+      color: #0d6efd;
+      border-radius: 5px;
+      margin: 6px 0;
+      transition: 0.3s;
+    }
 
-.submenu {  
-  margin-left: 15px;  
-  margin-top: 5px;  
-}  
+    .sidebar ul li:hover {
+      background-color: #e7f1ff;
+      color: #1e3a8a;
+    }
 
-.main {  
-  flex: 1;  
-  padding: 25px;  
-  background-color: #f9fafc;  
-  display: flex;  
-  flex-direction: column;  
-}  
+    .sidebar ul li.active {
+      background-color: #1e3a8a;
+      color: #fff;
+      font-weight: bold;
+    }
 
-.main h2 {  
-  color: #1e3a8a;  
-  font-size: 1.4rem;  
-  margin-bottom: 10px;  
-}  
+    .submenu {
+      margin-left: 15px;
+      margin-top: 5px;
+    }
 
-.viewer-container {  
-  flex: 1;  
-  background: white;  
-  border-radius: 12px;  
-  box-shadow: 0 5px 10px rgba(0,0,0,0.05);  
-  padding: 15px;  
-}  
+    .main {
+      flex: 1;
+      padding: 25px;
+      background-color: #f9fafc;
+      display: flex;
+      flex-direction: column;
+    }
 
-iframe {  
-  width: 100%;  
-  height: calc(100vh - 180px);  
-  border: none;  
-  border-radius: 10px;  
-}  
+    .main h2 {
+      color: #1e3a8a;
+      font-size: 1.4rem;
+      margin-bottom: 10px;
+    }
 
-@media (max-width: 768px) {  
-  .container {  
-    flex-direction: column;  
-  }  
+    .viewer-container {
+      flex: 1;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 5px 10px rgba(0,0,0,0.05);
+      padding: 15px;
+    }
 
-  .sidebar {  
-    width: 100%;  
-  }  
+    iframe {
+      width: 100%;
+      height: calc(100vh - 180px);
+      border: none;
+      border-radius: 10px;
+    }
 
-  iframe {  
-    height: 60vh;  
-  }  
-}
+    @media (max-width: 768px) {
+      .menu-btn {
+        display: block;
+      }
 
-  </style>  
-</head>  
-<body>    <header>  
-    Welcome to Documents Dashboard  
-  </header>    <div class="container">  
-    <aside class="sidebar">  
-      <h2>📁 HCU Documents</h2>  <div class="search-box">  
-    <input type="text" id="searchInput" placeholder="🔍 Search document..." onkeyup="filterList()" />  
-  </div>  
+      .container {
+        flex-direction: column;
+      }
 
-  <ul id="docList">  
-    <li>📂 P&ID  
-      <ul class="submenu">  
-        <li onclick="loadPDF('E-182b (reac).pdf', 'Reactor P&ID', this)">📄 Reactor P&ID</li>  
-        <li onclick="loadPDF('furnace.pdf', 'Furnace P&ID', this)">📄 Furnace P&ID</li>  
-        <li onclick="loadPDF('fractionator.pdf', 'Fractionator P&ID', this)">📄 Fractionator P&ID</li>  
-      </ul>  
-    </li>  
-    <li onclick="loadPDF('layout.pdf', 'Equipment Layout', this)">📄 Equipment Layout</li>  
-    <li onclick="loadPDF('line-list.pdf', 'Line List', this)">📄 Line List</li>  
-  </ul>  
-</aside>  
+      .sidebar {
+        position: absolute;
+        left: -260px;
+        top: 66px;
+        height: calc(100vh - 66px);
+        z-index: 10;
+      }
 
-<main class="main">  
-  <h2 id="docTitle">📄 Reactor P&ID</h2>  
-  <div class="viewer-container">  
-    <iframe id="pdfFrame" src="reactor.pdf"></iframe>  
-  </div>  
-</main>
+      .sidebar.active {
+        left: 0;
+      }
 
-  </div>    <script>  
-    function loadPDF(file, title, element) {  
-      document.getElementById('pdfFrame').src = file;  
-      document.getElementById('docTitle').innerText = "📄 " + title;  
-  
-      const allItems = document.querySelectorAll('#docList li');  
-      allItems.forEach(item => item.classList.remove('active'));  
-      element.classList.add('active');  
-    }  
-  
-    function filterList() {  
-      const filter = document.getElementById('searchInput').value.toLowerCase();  
-      const items = document.querySelectorAll('#docList li');  
-  
-      items.forEach(item => {  
-        const text = item.textContent.toLowerCase();  
-        if (text.includes(filter)) {  
-          item.style.display = '';  
-        } else {  
-          if (!item.querySelector('ul')) item.style.display = 'none';  
-        }  
-      });  
-    }  
-  </script>  </body>  
+      iframe {
+        height: 60vh;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <span>Welcome to Documents Dashboard</span>
+    <button id="toggleSidebar" class="menu-btn">☰</button>
+  </header>
+
+  <div class="container">
+    <aside class="sidebar" id="sidebar">
+      <h2>📁 HCU Documents</h2>
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="🔍 Search document..." onkeyup="filterList()" />
+      </div>
+
+      <ul id="docList">
+        <li>📂 P&ID
+          <ul class="submenu">
+            <li onclick="loadPDF('E-182b%20%28reac%29.pdf', 'Reactor P&ID', this)">📄 Reactor P&ID</li>
+            <li onclick="loadPDF('furnace.pdf', 'Furnace P&ID', this)">📄 Furnace P&ID</li>
+            <li onclick="loadPDF('fractionator.pdf', 'Fractionator P&ID', this)">📄 Fractionator P&ID</li>
+          </ul>
+        </li>
+        <li onclick="loadPDF('layout.pdf', 'Equipment Layout', this)">📄 Equipment Layout</li>
+        <li onclick="loadPDF('line-list.pdf', 'Line List', this)">📄 Line List</li>
+      </ul>
+    </aside>
+
+    <main class="main">
+      <h2 id="docTitle">📄 Reactor P&ID</h2>
+      <div class="viewer-container">
+        <iframe id="pdfFrame" src="E-182b%20%28reac%29.pdf"></iframe>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    function loadPDF(file, title, element) {
+      document.getElementById('pdfFrame').src = file;
+      document.getElementById('docTitle').innerText = "📄 " + title;
+
+      const allItems = document.querySelectorAll('#docList li');
+      allItems.forEach(item => item.classList.remove('active'));
+      element.classList.add('active');
+
+      // Close sidebar on mobile
+      document.getElementById('sidebar').classList.remove('active');
+    }
+
+    function filterList() {
+      const filter = document.getElementById('searchInput').value.toLowerCase();
+      const items = document.querySelectorAll('#docList li');
+
+      items.forEach(item => {
+        const text = item.textContent.toLowerCase();
+        if (text.includes(filter)) {
+          item.style.display = '';
+        } else {
+          if (!item.querySelector('ul')) item.style.display = 'none';
+        }
+      });
+    }
+
+    // Sidebar toggle for small screens
+    document.getElementById('toggleSidebar').addEventListener('click', function () {
+      document.getElementById('sidebar').classList.toggle('active');
+    });
+  </script>
+</body>
 </html>
