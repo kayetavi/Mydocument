@@ -1,21 +1,55 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Login Page</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login with Firebase</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .box {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px gray;
+    }
+    input {
+      display: block;
+      margin: 10px 0;
+      padding: 8px;
+      width: 100%;
+    }
+    button {
+      padding: 10px;
+      margin: 5px 0;
+      width: 100%;
+    }
+  </style>
 </head>
 <body>
-  <h2>Login</h2>
-  <input type="email" id="email" placeholder="Enter Email">
-  <input type="password" id="password" placeholder="Enter Password">
-  <button onclick="login()">Login</button>
-  <button onclick="signup()">Sign Up</button>
-  <button onclick="resetPassword()">Forgot Password</button>
+  <div class="box">
+    <h2>Firebase Auth</h2>
+    <input type="email" id="email" placeholder="Enter email" />
+    <input type="password" id="password" placeholder="Enter password" />
+    <button onclick="login()">Login</button>
+    <button onclick="signup()">Sign Up</button>
+    <button onclick="reset()">Forgot Password</button>
+  </div>
 
-  <!-- Firebase script paste yaha se -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import {
+      getAuth,
+      createUserWithEmailAndPassword,
+      signInWithEmailAndPassword,
+      sendPasswordResetEmail
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDysRpcubPyUY8P1CYse2E_nkzsv9HcBkE",
@@ -29,44 +63,28 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
 
-    // 🟩 Login function
-    window.login = function () {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-      signInWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
-          alert("Login Successful!");
-        })
-        .catch((error) => {
-          alert("Login Error: " + error.message);
-        });
-    };
-
-    // 🟩 Signup function
     window.signup = function () {
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
       createUserWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
-          alert("Signup Successful!");
-        })
-        .catch((error) => {
-          alert("Signup Error: " + error.message);
-        });
+        .then(() => alert("Signup successful!"))
+        .catch((e) => alert(e.message));
     };
 
-    // 🟩 Forgot password function
-    window.resetPassword = function () {
+    window.login = function () {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      signInWithEmailAndPassword(auth, email, password)
+        .then(() => alert("Login successful!"))
+        .catch((e) => alert(e.message));
+    };
+
+    window.reset = function () {
       const email = document.getElementById("email").value;
       sendPasswordResetEmail(auth, email)
-        .then(() => {
-          alert("Password reset email sent!");
-        })
-        .catch((error) => {
-          alert("Reset Error: " + error.message);
-        });
+        .then(() => alert("Password reset email sent!"))
+        .catch((e) => alert(e.message));
     };
   </script>
-  <!-- Firebase script paste yaha tak -->
 </body>
 </html>
