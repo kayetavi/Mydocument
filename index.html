@@ -2,37 +2,109 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Firebase Login</title>
-  <link rel="stylesheet" href="style.css" />
-  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Firebase Login System</title>
+  <style>
+    body {
+      background-color: #f4f4f4;
+      font-family: Arial, sans-serif;
+      display: flex;
+      height: 100vh;
+      justify-content: center;
+      align-items: center;
+      margin: 0;
+    }
+
+    .container {
+      background: white;
+      padding: 30px 40px;
+      border-radius: 12px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      width: 300px;
+    }
+
+    input {
+      display: block;
+      margin: 15px auto;
+      padding: 10px;
+      width: 90%;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+
+    .buttons button {
+      margin: 5px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    #loginBtn { background-color: #007bff; color: white; }
+    #signupBtn { background-color: #28a745; color: white; }
+    #forgotBtn { background-color: #ffc107; color: black; }
+
+    #message {
+      margin-top: 15px;
+      font-weight: bold;
+      color: #dc3545;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
-    <h2>Login</h2>
+    <h2>Firebase Login</h2>
     <input type="email" id="email" placeholder="Email" />
     <input type="password" id="password" placeholder="Password" />
-    <button onclick="login()">Login</button>
-    <button onclick="signup()">Sign Up</button>
+    <div class="buttons">
+      <button id="loginBtn">Login</button>
+      <button id="signupBtn">Sign Up</button>
+      <button id="forgotBtn">Forgot Password</button>
+    </div>
+    <p id="message"></p>
   </div>
-  <script src="firebase.js"></script>
-  <script src="script.js"></script>
+
+  <!-- Firebase Script -->
   <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyDysRpcubPyU8P1CYse2E_nkzsy9HCbkE",
-    authDomain: "hcu-mydocument.firebaseapp.com",
-    projectId: "hcu-mydocument",
-    storageBucket: "hcu-mydocument.appspot.com",
-    messagingSenderId: "812100927727",
-    appId: "1:812100927727:web:3ee1b237beceac0d8b9b1a"
-  };
+    const firebaseConfig = {
+      apiKey: "AIzaSyDysRpcubPyU8P1CYse2E_nkzsy9HCbkE",
+      authDomain: "hcu-mydocument.firebaseapp.com",
+      projectId: "hcu-mydocument",
+      storageBucket: "hcu-mydocument.appspot.com",
+      messagingSenderId: "812100927727",
+      appId: "1:812100927727:web:3ee1b237beceac0d8b9b1a"
+    };
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    const email = document.getElementById('email');
+    const password = document.getElementById('password');
+    const message = document.getElementById('message');
+
+    document.getElementById('signupBtn').addEventListener('click', () => {
+      createUserWithEmailAndPassword(auth, email.value, password.value)
+        .then(() => message.textContent = "✅ Signup successful!")
+        .catch(error => message.textContent = "❌ " + error.message);
+    });
+
+    document.getElementById('loginBtn').addEventListener('click', () => {
+      signInWithEmailAndPassword(auth, email.value, password.value)
+        .then(() => message.textContent = "✅ Login successful!")
+        .catch(error => message.textContent = "❌ " + error.message);
+    });
+
+    document.getElementById('forgotBtn').addEventListener('click', () => {
+      sendPasswordResetEmail(auth, email.value)
+        .then(() => message.textContent = "📧 Password reset sent to your email!")
+        .catch(error => message.textContent = "❌ " + error.message);
+    });
   </script>
 </body>
 </html>
