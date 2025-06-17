@@ -18,5 +18,21 @@
   </div>
   <script src="firebase.js"></script>
   <script src="script.js"></script>
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDysRpcubPyU8P1CYse2E_nkzsy9HCbkE",
+    authDomain: "hcu-mydocument.firebaseapp.com",
+    projectId: "hcu-mydocument",
+    storageBucket: "hcu-mydocument.appspot.com",
+    messagingSenderId: "812100927727",
+    appId: "1:812100927727:web:3ee1b237beceac0d8b9b1a"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  </script>
 </body>
 </html>
