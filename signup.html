@@ -1,8 +1,20 @@
-<!-- signup.html -->
-<input type="email" id="email" placeholder="Email">
-<input type="password" id="password" placeholder="Password">
-<button id="signup">Sign Up</button>
-<p id="message"></p>
-<script type="module">
-  // firebase setup + createUserWithEmailAndPassword
-</script>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Sign Up</title>
+  <link rel="stylesheet" href="style.css" />
+  <script type="module" src="firebase.js"></script>
+  <script type="module" src="auth.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h2>Sign Up</h2>
+    <form id="signupForm">
+      <input type="email" name="email" placeholder="Email" required />
+      <input type="password" name="password" placeholder="Password" required />
+      <button type="submit">Sign Up</button>
+    </form>
+    <a href="index.html">Back to Login</a>
+  </div>
+</body>
+</html>
