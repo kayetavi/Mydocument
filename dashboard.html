@@ -1,27 +1,26 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard</title>
   <link rel="stylesheet" href="style.css" />
-</head>
-<body>
-  <div class="container">
-    <h2>Welcome to Dashboard</h2>
-    <button id="logout">Logout</button>
-  </div>
-
   <script type="module">
     import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import { app } from './firebase.js';
 
     const auth = getAuth(app);
-    document.getElementById("logout").onclick = () => {
-      signOut(auth).then(() => {
-        window.location.href = "index.html";
-      });
+    window.onload = () => {
+      document.getElementById("logoutBtn").onclick = () => {
+        signOut(auth).then(() => {
+          window.location.href = "index.html";
+        });
+      };
     };
   </script>
+</head>
+<body>
+  <div class="container">
+    <h2>Welcome to the Dashboard</h2>
+    <button id="logoutBtn">Logout</button>
+  </div>
 </body>
 </html>
