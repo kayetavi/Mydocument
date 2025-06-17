@@ -2,327 +2,92 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Documents Dashboard</title>
+  <title>Login | Firebase Auth</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
-    :root {
-      --bg-light: #f6f8fc;
-      --bg-dark: #1e1e2f;
-      --text-light: #1e3a8a;
-      --text-dark: #f9f9fb;
-      --sidebar-bg-light: #e0f2fe;
-      --sidebar-bg-dark: #2b2b3d;
-      --folder-light: #dbeafe;
-      --folder-dark: #3a3a4f;
-    }
-
     body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      background-color: var(--bg-light);
-      color: var(--text-light);
-      transition: background 0.3s, color 0.3s;
-    }
-
-    body.dark {
-      background-color: var(--bg-dark);
-      color: var(--text-dark);
-    }
-
-    header {
-      background-color: #1e3a8a;
-      color: white;
-      padding: 18px 30px;
-      font-size: 1.8rem;
-      font-weight: bold;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .menu-btn, .dark-toggle {
-      background: none;
-      border: none;
-      font-size: 1.6rem;
-      color: white;
-      cursor: pointer;
-      margin-left: 15px;
-    }
-
-    .container {
-      display: flex;
-      flex: 1;
-    }
-
-    .sidebar {
-      width: 260px;
-      background: var(--sidebar-bg-light);
-      border-right: 1px solid #cbd5e1;
+      font-family: Arial, sans-serif;
+      background-color: #f7f7f7;
       padding: 20px;
-      overflow-y: auto;
-      transition: background 0.3s, left 0.3s;
+      max-width: 400px;
+      margin: 40px auto;
+      border-radius: 8px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
     }
-
-    body.dark .sidebar {
-      background: var(--sidebar-bg-dark);
-    }
-
-    .sidebar h2 {
-      font-size: 1.4rem;
-      margin-bottom: 15px;
-      border-bottom: 1px solid #93c5fd;
-      padding-bottom: 5px;
-    }
-
-    .search-box input {
+    h2 { text-align: center; }
+    input, button {
+      display: block;
       width: 100%;
-      padding: 8px;
-      margin-bottom: 15px;
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 5px;
       border: 1px solid #ccc;
-      border-radius: 6px;
     }
-
-    .folder-label {
-      display: flex;
-      justify-content: space-between;
-      padding: 8px 10px;
-      cursor: pointer;
-      background-color: var(--folder-light);
-      border-radius: 5px;
-      margin-bottom: 3px;
-    }
-
-    body.dark .folder-label {
-      background-color: var(--folder-dark);
-    }
-
-    .submenu {
-      margin-left: 10px;
-      display: none;
-    }
-
-    .submenu li {
-      padding: 8px 10px;
-      cursor: pointer;
-      background-color: #f0f9ff;
-      border-radius: 5px;
-      margin: 2px 0;
-    }
-
-    body.dark .submenu li {
-      background-color: #44445a;
-    }
-
-    .submenu li:hover {
-      background-color: #dbeafe;
-    }
-
-    .submenu li.active {
-      background-color: #1e3a8a;
+    button {
+      background-color: #4CAF50;
       color: white;
       font-weight: bold;
-    }
-
-    .main {
-      flex: 1;
-      padding: 25px;
-      background-color: #f9fafc;
-      transition: background 0.3s;
-    }
-
-    body.dark .main {
-      background-color: #1f1f2e;
-    }
-
-    .viewer-container {
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 5px 10px rgba(0,0,0,0.05);
-      padding: 15px;
-    }
-
-    body.dark .viewer-container {
-      background: #2a2a3c;
-    }
-
-    iframe {
-      width: 100%;
-      height: 70vh;
-      border: none;
-      border-radius: 10px;
-    }
-
-    .local-upload {
-      margin-top: 20px;
-    }
-
-    @media (max-width: 768px) {
-      .container {
-        flex-direction: column;
-      }
-
-      .sidebar {
-        position: absolute;
-        left: -260px;
-        top: 66px;
-        height: calc(100vh - 66px);
-        z-index: 10;
-      }
-
-      .sidebar.active {
-        left: 0;
-      }
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
-  <header>
-    <span>📁 Documents Dashboard</span>
-    <div>
-      <button id="darkModeToggle" class="dark-toggle" title="Toggle Dark Mode">🌙</button>
-      <button id="toggleSidebar" class="menu-btn">☰</button>
-    </div>
-  </header>
 
-  <div class="container">
-    <aside class="sidebar" id="sidebar">
-      <h2>HCU Documents</h2>
-      <div class="search-box">
-        <input type="text" id="searchInput" placeholder="Search document..." onkeyup="filterList()" />
-      </div>
+  <h2>Login</h2>
+  <input type="email" id="loginEmail" placeholder="Email" />
+  <input type="password" id="loginPassword" placeholder="Password" />
+  <button onclick="login()">Login</button>
 
-      <ul id="docList">
-        <li>
-          <div class="folder-label" onclick="toggleSubmenu(this)">📂 P&ID <span class="arrow">▶️</span></div>
-          <ul class="submenu">
-            <li onclick="loadPDF('E-182b-reac.pdf', 'P&ID 1 - Reactor', this)">📄 P&ID 1 - Reactor</li>
-            <li onclick="loadDoc('UTG_REPORT.xlsx', 'P&ID 2 - Furnace', this)">📊 P&ID 2 - Furnace (Excel)</li>
-            <li onclick="loadPDF('fractionator.pdf', 'P&ID 3 - Fractionator', this)">📄 P&ID 3 - Fractionator</li>
-          </ul>
-        </li>
+  <h2>Signup</h2>
+  <input type="email" id="signupEmail" placeholder="Email" />
+  <input type="password" id="signupPassword" placeholder="Password" />
+  <button onclick="signup()">Signup</button>
 
-        <li>
-          <div class="folder-label" onclick="toggleSubmenu(this)">📂 GAD <span class="arrow">▶️</span></div>
-          <ul class="submenu">
-            <li onclick="loadPDF('gad1.pdf', 'GAD 1 - Overview', this)">📄 GAD 1 - Overview</li>
-            <li onclick="loadPDF('gad2.pdf', 'GAD 2 - Structural', this)">📄 GAD 2 - Structural</li>
-          </ul>
-        </li>
+  <h2>Forgot Password</h2>
+  <input type="email" id="resetEmail" placeholder="Email" />
+  <button onclick="resetPassword()">Reset Password</button>
 
-        <li>
-          <div class="folder-label" onclick="toggleSubmenu(this)">📂 Other Files <span class="arrow">▶️</span></div>
-          <ul class="submenu">
-            <li onclick="loadPDF('layout.pdf', 'Equipment Layout', this)">📄 Equipment Layout</li>
-            <li onclick="loadPDF('line-list.pdf', 'Line List', this)">📄 Line List</li>
-            <li onclick="loadDoc('report.docx', 'Monthly Report (Word)', this)">📄 Monthly Report (Word)</li>
-            <li onclick="loadDoc('presentation.pptx', 'Review Slides (PPT)', this)">📊 Review Slides (PPT)</li>
-          </ul>
-        </li>
-      </ul>
-    </aside>
-
-    <main class="main">
-      <h2 id="docTitle">📄 Select a document</h2>
-      <div class="viewer-container">
-        <iframe id="pdfFrame" src=""></iframe>
-
-        <div class="local-upload">
-          <label for="localFile">📂 Or open a local PDF:</label>
-          <input type="file" id="localFile" accept="application/pdf" />
-        </div>
-      </div>
-    </main>
-  </div>
+  <!-- Firebase Scripts -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 
   <script>
-    function loadPDF(file, title, element) {
-      const viewer = document.getElementById('pdfFrame');
-      viewer.src = file;
-      document.getElementById('docTitle').innerText = "📄 " + title;
-      updateActiveItem(element);
+    const firebaseConfig = {
+      apiKey: "AIzaSyDysRpcubPYuY8P1CYse2E_nkzsv9HcBkE",
+      authDomain: "hcu-mydocument.firebaseapp.com",
+      projectId: "hcu-mydocument",
+      storageBucket: "hcu-mydocument.appspot.com",
+      messagingSenderId: "812100927727",
+      appId: "1:812100927727:web:69a50444fd7eb598b9b91a",
+      measurementId: "G-L59QC7EF7F"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    function login() {
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+      auth.signInWithEmailAndPassword(email, password)
+        .then(() => alert('✅ Logged in successfully!'))
+        .catch(error => alert("❌ " + error.message));
     }
 
-    function loadDoc(file, title, element) {
-      const base = location.origin + '/' + file;
-      const viewerURL = 'https://docs.google.com/gview?url=' + encodeURIComponent(base) + '&embedded=true';
-      const frame = document.getElementById('pdfFrame');
-
-      // Try Google Viewer (if online), fallback to download
-      frame.outerHTML = `<iframe id="pdfFrame" src="${viewerURL}"></iframe>`;
-      document.getElementById('docTitle').innerText = "📄 " + title;
-      updateActiveItem(element);
+    function signup() {
+      const email = document.getElementById('signupEmail').value;
+      const password = document.getElementById('signupPassword').value;
+      auth.createUserWithEmailAndPassword(email, password)
+        .then(() => alert('✅ Account created!'))
+        .catch(error => alert("❌ " + error.message));
     }
 
-    function updateActiveItem(element) {
-      const allItems = document.querySelectorAll('.submenu li');
-      allItems.forEach(item => item.classList.remove('active'));
-      if (element) element.classList.add('active');
-      document.getElementById('sidebar').classList.remove('active');
+    function resetPassword() {
+      const email = document.getElementById('resetEmail').value;
+      auth.sendPasswordResetEmail(email)
+        .then(() => alert('📧 Password reset email sent!'))
+        .catch(error => alert("❌ " + error.message));
     }
-
-    function filterList() {
-      const filter = document.getElementById('searchInput').value.toLowerCase();
-      const folders = document.querySelectorAll('#docList > li');
-
-      folders.forEach(folder => {
-        const submenu = folder.querySelector('.submenu');
-        const items = submenu.querySelectorAll('li');
-        let anyVisible = false;
-
-        items.forEach(item => {
-          const text = item.textContent.toLowerCase();
-          if (text.includes(filter)) {
-            item.style.display = '';
-            anyVisible = true;
-          } else {
-            item.style.display = 'none';
-          }
-        });
-
-        submenu.style.display = anyVisible ? 'block' : 'none';
-        folder.querySelector('.arrow').textContent = anyVisible ? '▼' : '▶️';
-      });
-    }
-
-    function toggleSubmenu(folderDiv) {
-      const submenu = folderDiv.nextElementSibling;
-      const arrow = folderDiv.querySelector('.arrow');
-      if (submenu.style.display === 'block') {
-        submenu.style.display = 'none';
-        arrow.textContent = '▶️';
-      } else {
-        submenu.style.display = 'block';
-        arrow.textContent = '▼';
-      }
-    }
-
-    // Sidebar toggle
-    document.getElementById('toggleSidebar').addEventListener('click', () => {
-      document.getElementById('sidebar').classList.toggle('active');
-    });
-
-    // Dark mode toggle
-    document.getElementById('darkModeToggle').addEventListener('click', () => {
-      document.body.classList.toggle('dark');
-    });
-
-    // Local file upload
-    document.getElementById('localFile').addEventListener('change', function (e) {
-      const file = e.target.files[0];
-      if (file && file.type === 'application/pdf') {
-        const url = URL.createObjectURL(file);
-        document.getElementById('pdfFrame').src = url;
-        document.getElementById('docTitle').innerText = "📄 " + file.name;
-      } else {
-        alert("Please select a valid PDF file.");
-      }
-    });
-
-    // Collapse all folders initially
-    document.querySelectorAll('.submenu').forEach(sub => sub.style.display = 'none');
   </script>
+
 </body>
 </html>
