@@ -5,18 +5,31 @@
   <title>Documents Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Segoe UI', sans-serif;
+    :root {
+      --bg-light: #f6f8fc;
+      --bg-dark: #1e1e2f;
+      --text-light: #1e3a8a;
+      --text-dark: #f9f9fb;
+      --sidebar-bg-light: #e0f2fe;
+      --sidebar-bg-dark: #2b2b3d;
+      --folder-light: #dbeafe;
+      --folder-dark: #3a3a4f;
     }
 
     body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
       display: flex;
       flex-direction: column;
       height: 100vh;
-      background: #f6f8fc;
+      background-color: var(--bg-light);
+      color: var(--text-light);
+      transition: background 0.3s, color 0.3s;
+    }
+
+    body.dark {
+      background-color: var(--bg-dark);
+      color: var(--text-dark);
     }
 
     header {
@@ -30,13 +43,13 @@
       align-items: center;
     }
 
-    .menu-btn {
+    .menu-btn, .dark-toggle {
       background: none;
       border: none;
-      font-size: 1.8rem;
+      font-size: 1.6rem;
       color: white;
       cursor: pointer;
-      display: none;
+      margin-left: 15px;
     }
 
     .container {
@@ -46,16 +59,19 @@
 
     .sidebar {
       width: 260px;
-      background: #e0f2fe;
+      background: var(--sidebar-bg-light);
       border-right: 1px solid #cbd5e1;
       padding: 20px;
       overflow-y: auto;
-      transition: left 0.3s ease;
+      transition: background 0.3s, left 0.3s;
+    }
+
+    body.dark .sidebar {
+      background: var(--sidebar-bg-dark);
     }
 
     .sidebar h2 {
       font-size: 1.4rem;
-      color: #1e3a8a;
       margin-bottom: 15px;
       border-bottom: 1px solid #93c5fd;
       padding-bottom: 5px;
@@ -69,43 +85,39 @@
       border-radius: 6px;
     }
 
-    .sidebar ul {
-      list-style: none;
-      padding-left: 0;
-    }
-
-    .sidebar ul li {
-      margin: 6px 0;
-    }
-
     .folder-label {
       display: flex;
-      align-items: center;
       justify-content: space-between;
       padding: 8px 10px;
       cursor: pointer;
-      background-color: #dbeafe;
-      color: #1d4ed8;
+      background-color: var(--folder-light);
       border-radius: 5px;
-      font-weight: bold;
-      transition: background 0.2s;
+      margin-bottom: 3px;
     }
 
-    .folder-label:hover {
-      background-color: #bfdbfe;
+    body.dark .folder-label {
+      background-color: var(--folder-dark);
+    }
+
+    .submenu {
+      margin-left: 10px;
+      display: none;
     }
 
     .submenu li {
       padding: 8px 10px;
       cursor: pointer;
-      color: #1e40af;
-      border-radius: 5px;
       background-color: #f0f9ff;
+      border-radius: 5px;
       margin: 2px 0;
     }
 
+    body.dark .submenu li {
+      background-color: #44445a;
+    }
+
     .submenu li:hover {
-      background-color: #e0f2fe;
+      background-color: #dbeafe;
     }
 
     .submenu li.active {
@@ -114,24 +126,15 @@
       font-weight: bold;
     }
 
-    .submenu {
-      margin-left: 15px;
-      margin-top: 5px;
-      display: none;
-    }
-
     .main {
       flex: 1;
       padding: 25px;
       background-color: #f9fafc;
-      display: flex;
-      flex-direction: column;
+      transition: background 0.3s;
     }
 
-    .main h2 {
-      color: #1e3a8a;
-      font-size: 1.4rem;
-      margin-bottom: 10px;
+    body.dark .main {
+      background-color: #1f1f2e;
     }
 
     .viewer-container {
@@ -140,6 +143,11 @@
       border-radius: 12px;
       box-shadow: 0 5px 10px rgba(0,0,0,0.05);
       padding: 15px;
+      transition: background 0.3s;
+    }
+
+    body.dark .viewer-container {
+      background: #2a2a3c;
     }
 
     iframe {
@@ -150,10 +158,6 @@
     }
 
     @media (max-width: 768px) {
-      .menu-btn {
-        display: block;
-      }
-
       .container {
         flex-direction: column;
       }
@@ -169,67 +173,59 @@
       .sidebar.active {
         left: 0;
       }
-
-      iframe {
-        height: 60vh;
-      }
     }
   </style>
 </head>
 <body>
   <header>
-    <span>Welcome to Documents Dashboard</span>
-    <button id="toggleSidebar" class="menu-btn">☰</button>
+    <span>📁 Documents Dashboard</span>
+    <div>
+      <button id="darkModeToggle" class="dark-toggle" title="Toggle Dark Mode">🌙</button>
+      <button id="toggleSidebar" class="menu-btn">☰</button>
+    </div>
   </header>
 
   <div class="container">
     <aside class="sidebar" id="sidebar">
-      <h2>📁 HCU Documents</h2>
+      <h2>HCU Documents</h2>
       <div class="search-box">
-        <input type="text" id="searchInput" placeholder="🔍 Search document..." onkeyup="filterList()" />
+        <input type="text" id="searchInput" placeholder="Search document..." onkeyup="filterList()" />
       </div>
 
       <ul id="docList">
-        <!-- P&ID Folder -->
         <li>
-          <div class="folder-label" onclick="toggleSubmenu(this)">
-            📂 P&ID <span class="arrow">▶️</span>
-          </div>
+          <div class="folder-label" onclick="toggleSubmenu(this)">📂 P&ID <span class="arrow">▶️</span></div>
           <ul class="submenu">
-            <li onclick="loadPDF('E-182b-reac.pdf', 'P&ID_182b', this)">📄 P&ID_182b</li>
-            <li onclick="loadPDF('UTG _REPORT.xlsx', 'UTG', this)">📄 P&ID 2 - Furnace</li>
+            <li onclick="loadPDF('E-182b-reac.pdf', 'P&ID 1 - Reactor', this)">📄 P&ID 1 - Reactor</li>
+            <li onclick="loadDoc('UTG _REPORT.xlsx', 'P&ID 2 - Furnace', this)">📊 P&ID 2 - Furnace (Excel)</li>
             <li onclick="loadPDF('fractionator.pdf', 'P&ID 3 - Fractionator', this)">📄 P&ID 3 - Fractionator</li>
           </ul>
         </li>
 
-        <!-- GAD Folder -->
         <li>
-          <div class="folder-label" onclick="toggleSubmenu(this)">
-            📂 GAD <span class="arrow">▶️</span>
-          </div>
+          <div class="folder-label" onclick="toggleSubmenu(this)">📂 GAD <span class="arrow">▶️</span></div>
           <ul class="submenu">
             <li onclick="loadPDF('gad1.pdf', 'GAD 1 - Overview', this)">📄 GAD 1 - Overview</li>
             <li onclick="loadPDF('gad2.pdf', 'GAD 2 - Structural', this)">📄 GAD 2 - Structural</li>
           </ul>
         </li>
 
-        <!-- Other Files Folder -->
         <li>
-          <div class="folder-label" onclick="toggleSubmenu(this)">
-            📂 Other Files <span class="arrow">▶️</span>
-          </div>
+          <div class="folder-label" onclick="toggleSubmenu(this)">📂 Other Files <span class="arrow">▶️</span></div>
           <ul class="submenu">
             <li onclick="loadPDF('layout.pdf', 'Equipment Layout', this)">📄 Equipment Layout</li>
             <li onclick="loadPDF('line-list.pdf', 'Line List', this)">📄 Line List</li>
+            <li onclick="loadDoc('report.docx', 'Monthly Report (Word)', this)">📄 Monthly Report (Word)</li>
+            <li onclick="loadDoc('presentation.pptx', 'Review Slides (PPT)', this)">📊 Review Slides (PPT)</li>
           </ul>
         </li>
       </ul>
     </aside>
 
     <main class="main">
-      <h2 id="docTitle">📄 P&ID 1 - Reactor</h2>
+      <h2 id="docTitle">📄 Select a document</h2>
       <div class="viewer-container">
-        <iframe id="pdfFrame" src="E-182b (reac).pdf"></iframe>
+        <iframe id="pdfFrame" src=""></iframe>
       </div>
     </main>
   </div>
@@ -238,13 +234,21 @@
     function loadPDF(file, title, element) {
       document.getElementById('pdfFrame').src = file;
       document.getElementById('docTitle').innerText = "📄 " + title;
+      updateActiveItem(element);
+    }
 
-      const allItems = document.querySelectorAll('#docList li ul li');
+    function loadDoc(file, title, element) {
+      const fileURL = location.origin + '/' + file;
+      const viewerURL = 'https://docs.google.com/gview?url=' + encodeURIComponent(fileURL) + '&embedded=true';
+      document.getElementById('pdfFrame').src = viewerURL;
+      document.getElementById('docTitle').innerText = "📄 " + title;
+      updateActiveItem(element);
+    }
+
+    function updateActiveItem(element) {
+      const allItems = document.querySelectorAll('.submenu li');
       allItems.forEach(item => item.classList.remove('active'));
-      if (element) {
-        element.classList.add('active');
-      }
-
+      if (element) element.classList.add('active');
       document.getElementById('sidebar').classList.remove('active');
     }
 
@@ -265,7 +269,6 @@
     function toggleSubmenu(folderDiv) {
       const submenu = folderDiv.nextElementSibling;
       const arrow = folderDiv.querySelector('.arrow');
-
       if (submenu.style.display === 'block') {
         submenu.style.display = 'none';
         arrow.textContent = '▶️';
@@ -275,8 +278,14 @@
       }
     }
 
-    document.getElementById('toggleSidebar').addEventListener('click', function () {
+    // Toggle sidebar
+    document.getElementById('toggleSidebar').addEventListener('click', () => {
       document.getElementById('sidebar').classList.toggle('active');
+    });
+
+    // Toggle dark mode
+    document.getElementById('darkModeToggle').addEventListener('click', () => {
+      document.body.classList.toggle('dark');
     });
   </script>
 </body>
