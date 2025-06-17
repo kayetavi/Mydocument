@@ -138,12 +138,10 @@
     }
 
     .viewer-container {
-      flex: 1;
       background: white;
       border-radius: 12px;
       box-shadow: 0 5px 10px rgba(0,0,0,0.05);
       padding: 15px;
-      transition: background 0.3s;
     }
 
     body.dark .viewer-container {
@@ -152,9 +150,13 @@
 
     iframe {
       width: 100%;
-      height: calc(100vh - 180px);
+      height: 70vh;
       border: none;
       border-radius: 10px;
+    }
+
+    .local-upload {
+      margin-top: 20px;
     }
 
     @media (max-width: 768px) {
@@ -197,7 +199,7 @@
           <div class="folder-label" onclick="toggleSubmenu(this)">📂 P&ID <span class="arrow">▶️</span></div>
           <ul class="submenu">
             <li onclick="loadPDF('E-182b-reac.pdf', 'P&ID 1 - Reactor', this)">📄 P&ID 1 - Reactor</li>
-            <li onclick="loadDoc('UTG _REPORT.xlsx', 'P&ID 2 - Furnace', this)">📊 P&ID 2 - Furnace (Excel)</li>
+            <li onclick="loadDoc('UTG_REPORT.xlsx', 'P&ID 2 - Furnace', this)">📊 P&ID 2 - Furnace (Excel)</li>
             <li onclick="loadPDF('fractionator.pdf', 'P&ID 3 - Fractionator', this)">📄 P&ID 3 - Fractionator</li>
           </ul>
         </li>
@@ -226,21 +228,30 @@
       <h2 id="docTitle">📄 Select a document</h2>
       <div class="viewer-container">
         <iframe id="pdfFrame" src=""></iframe>
+
+        <div class="local-upload">
+          <label for="localFile">📂 Or open a local PDF:</label>
+          <input type="file" id="localFile" accept="application/pdf" />
+        </div>
       </div>
     </main>
   </div>
 
   <script>
     function loadPDF(file, title, element) {
-      document.getElementById('pdfFrame').src = file;
+      const viewer = document.getElementById('pdfFrame');
+      viewer.src = file;
       document.getElementById('docTitle').innerText = "📄 " + title;
       updateActiveItem(element);
     }
 
     function loadDoc(file, title, element) {
-      const fileURL = location.origin + '/' + file;
-      const viewerURL = 'https://docs.google.com/gview?url=' + encodeURIComponent(fileURL) + '&embedded=true';
-      document.getElementById('pdfFrame').src = viewerURL;
+      const base = location.origin + '/' + file;
+      const viewerURL = 'https://docs.google.com/gview?url=' + encodeURIComponent(base) + '&embedded=true';
+      const frame = document.getElementById('pdfFrame');
+
+      // Try Google Viewer (if online), fallback to download
+      frame.outerHTML = `<iframe id="pdfFrame" src="${viewerURL}"></iframe>`;
       document.getElementById('docTitle').innerText = "📄 " + title;
       updateActiveItem(element);
     }
@@ -254,15 +265,25 @@
 
     function filterList() {
       const filter = document.getElementById('searchInput').value.toLowerCase();
-      const items = document.querySelectorAll('#docList li ul li, #docList > li');
+      const folders = document.querySelectorAll('#docList > li');
 
-      items.forEach(item => {
-        const text = item.textContent.toLowerCase();
-        if (text.includes(filter)) {
-          item.style.display = '';
-        } else {
-          if (!item.querySelector('ul')) item.style.display = 'none';
-        }
+      folders.forEach(folder => {
+        const submenu = folder.querySelector('.submenu');
+        const items = submenu.querySelectorAll('li');
+        let anyVisible = false;
+
+        items.forEach(item => {
+          const text = item.textContent.toLowerCase();
+          if (text.includes(filter)) {
+            item.style.display = '';
+            anyVisible = true;
+          } else {
+            item.style.display = 'none';
+          }
+        });
+
+        submenu.style.display = anyVisible ? 'block' : 'none';
+        folder.querySelector('.arrow').textContent = anyVisible ? '▼' : '▶️';
       });
     }
 
@@ -278,15 +299,30 @@
       }
     }
 
-    // Toggle sidebar
+    // Sidebar toggle
     document.getElementById('toggleSidebar').addEventListener('click', () => {
       document.getElementById('sidebar').classList.toggle('active');
     });
 
-    // Toggle dark mode
+    // Dark mode toggle
     document.getElementById('darkModeToggle').addEventListener('click', () => {
       document.body.classList.toggle('dark');
     });
+
+    // Local file upload
+    document.getElementById('localFile').addEventListener('change', function (e) {
+      const file = e.target.files[0];
+      if (file && file.type === 'application/pdf') {
+        const url = URL.createObjectURL(file);
+        document.getElementById('pdfFrame').src = url;
+        document.getElementById('docTitle').innerText = "📄 " + file.name;
+      } else {
+        alert("Please select a valid PDF file.");
+      }
+    });
+
+    // Collapse all folders initially
+    document.querySelectorAll('.submenu').forEach(sub => sub.style.display = 'none');
   </script>
 </body>
 </html>
