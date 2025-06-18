@@ -4,67 +4,9 @@
   <meta charset="UTF-8" />
   <title>Login</title>
   <link rel="stylesheet" href="style.css" />
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: #e0f2fe;
-      height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .login-box {
-      background: white;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-      width: 100%;
-      max-width: 400px;
-    }
-
-    .login-box h2 {
-      text-align: center;
-      margin-bottom: 20px;
-      color: #1e3a8a;
-    }
-
-    .login-box input {
-      width: 100%;
-      padding: 12px;
-      margin: 10px 0;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      font-size: 16px;
-    }
-
-    .login-box button {
-      width: 100%;
-      padding: 12px;
-      background: #1e3a8a;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-
-    .login-box .link {
-      text-align: center;
-      margin-top: 15px;
-    }
-
-    .login-box .link a {
-      color: #1e3a8a;
-      text-decoration: none;
-    }
-  </style>
 </head>
 <body>
-  <div class="login-box">
+  <div class="box">
     <h2>Login</h2>
     <input type="text" id="username" placeholder="Username" />
     <input type="password" id="password" placeholder="Password" />
@@ -74,25 +16,6 @@
     </div>
   </div>
 
-  <script>
-    function login() {
-      const username = document.getElementById("username").value;
-      const password = document.getElementById("password").value;
-
-      const storedUser = localStorage.getItem("user");
-      if (!storedUser) {
-        alert("No account found. Please sign up first.");
-        return;
-      }
-
-      const user = JSON.parse(storedUser);
-      if (username === user.username && password === user.password) {
-        localStorage.setItem("loggedInUser", username);
-        window.location.href = "dashboard.html";
-      } else {
-        alert("Invalid credentials.");
-      }
-    }
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
