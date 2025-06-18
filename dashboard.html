@@ -2,43 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Documents Dashboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="style.css" />
+  <title>Dashboard</title>
 </head>
 <body>
-  <header>
-    <span>📁 Documents Dashboard</span>
-    <div>
-      <button id="darkModeToggle" class="dark-toggle" title="Toggle Dark Mode">🌙</button>
-      <button id="toggleSidebar" class="menu-btn">☰</button>
-    </div>
-  </header>
-
-  <div class="container">
-    <aside class="sidebar" id="sidebar">
-      <h2>HCU Documents</h2>
-      <div class="search-box">
-        <input type="text" id="searchInput" placeholder="Search document..." />
-      </div>
-
-      <ul id="docList">
-        <!-- folders go here -->
-      </ul>
-    </aside>
-
-    <main class="main">
-      <h2 id="docTitle">📄 Welcome, <span id="userWelcome"></span> – Select a document</h2>
-      <div class="viewer-container">
-        <iframe id="pdfFrame" src=""></iframe>
-        <div class="local-upload">
-          <label for="localFile">📂 Or open a local PDF:</label>
-          <input type="file" id="localFile" accept="application/pdf" />
-        </div>
-      </div>
-    </main>
-  </div>
-
-  <script src="dashboard.js"></script>
+  <h1>Welcome to Document Dashboard!</h1>
 </body>
 </html>
