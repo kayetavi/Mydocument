@@ -15,7 +15,6 @@
       justify-content: center;
       height: 100vh;
     }
-
     .container {
       background: white;
       padding: 30px;
@@ -25,31 +24,24 @@
       max-width: 400px;
       text-align: center;
     }
-
     h2 {
       margin-bottom: 20px;
       color: #1e3a8a;
     }
-
-    input {
+    input, button {
       width: 100%;
       padding: 10px;
       margin: 10px 0;
       border-radius: 5px;
       border: 1px solid #ccc;
     }
-
     button {
-      width: 100%;
-      padding: 10px;
       background-color: #1e3a8a;
       color: white;
       border: none;
-      border-radius: 5px;
-      cursor: pointer;
       font-weight: bold;
+      cursor: pointer;
     }
-
     a {
       display: block;
       margin-top: 15px;
@@ -60,12 +52,31 @@
 </head>
 <body>
   <div class="container">
-    <h2>Reset Password</h2>
-    <form action="#" method="POST">
-      <input type="email" placeholder="Enter your email" required />
+    <h2>Forgot Password</h2>
+    <p>Enter your email to receive a reset link.</p>
+    <form id="resetForm">
+      <input type="email" id="resetEmail" placeholder="Email" required />
       <button type="submit">Send Reset Link</button>
     </form>
     <a href="index.html">Back to Login</a>
   </div>
+
+  <script type="module">
+    import { app } from './firebase.js';
+    import {
+      getAuth,
+      sendPasswordResetEmail
+    } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+
+    const auth = getAuth(app);
+    document.getElementById('resetForm').addEventListener('submit', e => {
+      e.preventDefault();
+      const email = document.getElementById('resetEmail').value;
+
+      sendPasswordResetEmail(auth, email)
+        .then(() => alert("Reset email sent! Check your inbox."))
+        .catch(err => alert("Error: " + err.message));
+    });
+  </script>
 </body>
 </html>
