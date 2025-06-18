@@ -6,6 +6,33 @@
 </head>
 <body>
   <h1>🎉 Welcome to Your Document Dashboard!</h1>
-  <p>You are now logged in.</p>
+  <p id="user-info">Loading user info...</p>
+  <button onclick="logout()">Logout</button>
+
+  <script type="module">
+    import { app } from './firebase.js';
+    import {
+      getAuth,
+      onAuthStateChanged,
+      signOut
+    } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+
+    const auth = getAuth(app);
+
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        document.getElementById('user-info').innerText = `Logged in as: ${user.email}`;
+      } else {
+        // Redirect to login if not logged in
+        window.location.href = 'index.html';
+      }
+    });
+
+    window.logout = function () {
+      signOut(auth).then(() => {
+        window.location.href = 'index.html';
+      });
+    };
+  </script>
 </body>
 </html>
