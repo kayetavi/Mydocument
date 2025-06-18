@@ -1,12 +1,14 @@
 function login() {
-  const username = document.getElementById('username').value.trim();
-  const password = document.getElementById('password').value.trim();
+  const username = document.getElementById('username').value;
 
-  // Dummy check
-  if (username && password) {
-    localStorage.setItem('loggedInUser', username); // store username
-    window.location.href = 'dashboard.html';
-  } else {
-    alert("Please enter both username and password");
+  if (username.trim() === '') {
+    alert('Please enter a username');
+    return;
   }
+
+  // Store username for dashboard
+  localStorage.setItem('loggedInUser', username);
+
+  // Redirect to dashboard
+  window.location.href = 'dashboard.html';
 }
