@@ -50,11 +50,19 @@
       font-weight: bold;
     }
 
-    a {
-      display: block;
+    .link-group {
       margin-top: 15px;
+    }
+
+    .link-group a {
+      display: block;
       color: #1e3a8a;
       text-decoration: none;
+      margin: 5px 0;
+    }
+
+    .link-group a:hover {
+      text-decoration: underline;
     }
   </style>
 </head>
@@ -66,7 +74,11 @@
       <input type="password" placeholder="Password" required />
       <button type="submit">Login</button>
     </form>
-    <a href="signup.html">Create an account</a>
+
+    <div class="link-group">
+      <a href="forgot-password.html">Forgot Password?</a>
+      <a href="signup.html">Create an account</a>
+    </div>
   </div>
 </body>
 </html>
