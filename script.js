@@ -1,22 +1,18 @@
-function signup() {
-  const username = document.getElementById("username").value;
-  const password = document.getElementById("password").value;
-  localStorage.setItem("user", JSON.stringify({ username, password }));
-  alert("Account created! Please login.");
-  window.location.href = "login.html";
+function showForm(id, event) {
+  const forms = document.querySelectorAll('.form');
+  const tabs = document.querySelectorAll('.tab-btn');
+
+  forms.forEach(f => f.classList.remove('active'));
+  tabs.forEach(t => t.classList.remove('active'));
+
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
 }
 
-function login() {
-  const username = document.getElementById("username").value;
-  const password = document.getElementById("password").value;
-  const stored = JSON.parse(localStorage.getItem("user"));
+// Simple login redirect simulation
+function handleLogin(event) {
+  event.preventDefault();
 
-  if (!stored) {
-    alert("No user found. Please sign up.");
-  } else if (stored.username === username && stored.password === password) {
-    alert("Login successful!");
-    window.location.href = "dashboard.html";
-  } else {
-    alert("Invalid credentials.");
-  }
+  // You can add validation logic here
+  window.location.href = "dashboard.html"; // or your real dashboard file
 }
