@@ -1,26 +1,61 @@
-<body>
-  <!-- ... heading, buttons ... -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Document Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</head>
+<body style="font-family: Arial; padding: 20px;">
+  <h1>🎉 Welcome to Your Document Dashboard!</h1>
+  <p id="user-info">Loading user info...</p>
+  <button onclick="logout()">Logout</button>
 
+  <hr />
+
+  <h2>📁 Upload PDF/Excel</h2>
   <input type="file" id="fileInput" />
   <button onclick="uploadFile()">Upload</button>
 
   <h3 id="fileLink"></h3>
-  <iframe id="filePreview"></iframe>
+  <iframe id="filePreview" width="100%" height="500px" style="margin-top: 20px; border: 1px solid #ccc;"></iframe>
 
-  <!-- 👇 SCRIPT block yahan hai -->
+  <!-- Firebase Scripts -->
   <script type="module">
     import { app } from './firebase.js';
+
     import {
-      getAuth, onAuthStateChanged, signOut
+      getAuth,
+      onAuthStateChanged,
+      signOut
     } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+
     import {
-      getStorage, ref, uploadBytesResumable, getDownloadURL
+      getStorage,
+      ref,
+      uploadBytesResumable,
+      getDownloadURL
     } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js';
 
     const auth = getAuth(app);
     const storage = getStorage(app);
 
-    // ✅ Replace only this function below:
+    // 🔐 Check if user is logged in
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        document.getElementById('user-info').innerText = `Logged in as: ${user.email}`;
+      } else {
+        window.location.href = 'index.html'; // redirect to login
+      }
+    });
+
+    // 🔓 Logout
+    window.logout = function () {
+      signOut(auth).then(() => {
+        window.location.href = 'index.html';
+      });
+    };
+
+    // 📁 Upload Function
     window.uploadFile = function () {
       const file = document.getElementById("fileInput").files[0];
       if (!file) {
@@ -64,9 +99,6 @@
         }
       );
     };
-
-    // Other code...
-    onAuthStateChanged(auth, user => { ... });
-    window.logout = function () { ... };
   </script>
 </body>
+</html>
