@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Dashboard</title>
+  <title>Document Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 </head>
 <body style="font-family: Arial; padding: 20px;">
@@ -19,19 +19,16 @@
   <h3 id="fileLink"></h3>
   <iframe id="filePreview" width="100%" height="500px" style="margin-top: 20px; border: 1px solid #ccc;"></iframe>
 
-  <!-- Firebase Auth & Storage Script -->
+  <!-- Firebase Scripts -->
   <script type="module">
-    // 1. Import firebase.js file
     import { app } from './firebase.js';
 
-    // 2. Firebase Auth
     import {
       getAuth,
       onAuthStateChanged,
       signOut
     } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 
-    // 3. Firebase Storage
     import {
       getStorage,
       ref,
@@ -39,11 +36,10 @@
       getDownloadURL
     } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js';
 
-    // 4. Init auth and storage
     const auth = getAuth(app);
     const storage = getStorage(app);
 
-    // 5. Auth check: only allow logged-in users
+    // 🔐 Check if user is logged in
     onAuthStateChanged(auth, user => {
       if (user) {
         document.getElementById('user-info').innerText = `Logged in as: ${user.email}`;
@@ -52,14 +48,14 @@
       }
     });
 
-    // 6. Logout button
+    // 🔓 Logout
     window.logout = function () {
       signOut(auth).then(() => {
         window.location.href = 'index.html';
       });
     };
 
-    // 7. Upload file to user's folder
+    // 📁 Upload Function
     window.uploadFile = function () {
       const file = document.getElementById("fileInput").files[0];
       if (!file) {
@@ -67,22 +63,20 @@
         return;
       }
 
-      const userEmail = auth.currentUser.email.replace(/\./g, '_'); // folder-safe name
+      const userEmail = auth.currentUser.email.replace(/\./g, '_'); // clean folder name
       const path = `documents/${userEmail}/${file.name}`;
-
       const storageRef = ref(storage, path);
       const uploadTask = uploadBytesResumable(storageRef, file);
 
       uploadTask.on('state_changed',
-        (snapshot) => {
-          // Optional: upload progress
-        },
+        null,
         (error) => {
           alert("Upload failed: " + error.message);
         },
         () => {
           getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-            document.getElementById("fileLink").innerHTML = `<strong>✅ Uploaded:</strong> <a href="${downloadURL}" target="_blank">${file.name}</a>`;
+            document.getElementById("fileLink").innerHTML =
+              `<strong>✅ Uploaded:</strong> <a href="${downloadURL}" target="_blank">${file.name}</a>`;
 
             const ext = file.name.split('.').pop().toLowerCase();
             if (ext === "pdf") {
