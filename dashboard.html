@@ -4,11 +4,22 @@
   <meta charset="UTF-8">
   <title>Dashboard</title>
 </head>
-<body>
+<body style="font-family: Arial; padding: 20px;">
+
   <h1>🎉 Welcome to Your Document Dashboard!</h1>
   <p id="user-info">Loading user info...</p>
   <button onclick="logout()">Logout</button>
 
+  <hr>
+
+  <h2>📁 Upload PDF/Excel</h2>
+  <input type="file" id="fileInput" />
+  <button onclick="uploadFile()">Upload</button>
+
+  <h3 id="fileLink"></h3>
+  <iframe id="filePreview" width="100%" height="500px" style="margin-top: 20px; border: 1px solid #ccc;"></iframe>
+
+  <!-- SCRIPT -->
   <script type="module">
     import { app } from './firebase.js';
     import {
@@ -17,22 +28,66 @@
       signOut
     } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 
-    const auth = getAuth(app);
+    import {
+      getStorage,
+      ref,
+      uploadBytesResumable,
+      getDownloadURL
+    } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js';
 
+    const auth = getAuth(app);
+    const storage = getStorage(app);
+
+    // Auth Check
     onAuthStateChanged(auth, user => {
       if (user) {
         document.getElementById('user-info').innerText = `Logged in as: ${user.email}`;
       } else {
-        // Redirect to login if not logged in
         window.location.href = 'index.html';
       }
     });
 
+    // Logout Function
     window.logout = function () {
       signOut(auth).then(() => {
         window.location.href = 'index.html';
       });
     };
+
+    // Upload File to Firebase Storage
+    window.uploadFile = function () {
+      const file = document.getElementById("fileInput").files[0];
+      if (!file) {
+        alert("Please select a file first.");
+        return;
+      }
+
+      const storageRef = ref(storage, 'documents/' + file.name);
+      const uploadTask = uploadBytesResumable(storageRef, file);
+
+      uploadTask.on('state_changed',
+        (snapshot) => {
+          // progress can be shown here
+        },
+        (error) => {
+          alert("Upload failed: " + error.message);
+        },
+        () => {
+          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+            const ext = file.name.split('.').pop().toLowerCase();
+            document.getElementById("fileLink").innerHTML = `<strong>✅ Uploaded:</strong> <a href="${downloadURL}" target="_blank">${file.name}</a>`;
+
+            // Only preview if it's a PDF
+            if (ext === "pdf") {
+              document.getElementById("filePreview").src = downloadURL;
+            } else {
+              document.getElementById("filePreview").src = "";
+            }
+          });
+        }
+      );
+    };
   </script>
+
 </body>
 </html>
