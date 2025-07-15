@@ -1,86 +1,117 @@
-<script>
-  const psvDataList = [];
-  let selectedIndex = null;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Safety Valve Calibration Report</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
 
-  document.getElementById('user-info').innerText = `Local Mode - No Login`;
-  document.querySelector('button[onclick="logout()"]').style.display = "none";
+<div class="btn-row">
+  <button onclick="showCard('entryCard')">➕ Add New Entry</button>
+  <button onclick="showCard('viewCard')">📄 View Records</button>
+</div>
 
-  document.getElementById("psvForm").addEventListener("submit", function (e) {
-    e.preventDefault();
-    const data = new FormData(e.target);
-    const entry = {};
-    data.forEach((value, key) => entry[key] = value);
+<!-- Entry Card -->
+<div id="entryCard" class="card visible">
+  <div class="container">
+    <h2>NUMALIGARH REFINERY LIMITED</h2>
+    <h3>SAFETY VALVE CALIBRATION REPORT</h3>
 
-    if (selectedIndex !== null) {
-      psvDataList[selectedIndex] = entry;
-      updateTable();
-      selectedIndex = null;
-    } else {
-      psvDataList.push(entry);
-      addRow(psvDataList.length - 1);
-    }
+    <div class="form-grid" id="formFields">
+      <div class="form-group"><label>Date:</label><input type="date" id="dateInput" /></div>
+      <div class="form-group"><label>Time:</label><input type="time" /></div>
+      <div class="form-group"><label>Unit:</label><input type="text" /></div>
+      <div class="form-group"><label>Tag No:</label><input type="text" id="tagInput" /></div>
+      <input type="hidden" id="currentEditTag" />
+      <div class="form-group"><label>Type:</label>
+        <select>
+          <option>Conventional</option>
+          <option>Balanced Bellow</option>
+          <option>Open Bonnet</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Manufacturer:</label><input type="text" /></div>
+      <div class="form-group"><label>Service:</label><input type="text" /></div>
+      <div class="form-group"><label>Work Order No:</label><input type="text" /></div>
+      <div class="form-group"><label>Work Order Date:</label><input type="date" /></div>
+      <div class="form-group"><label>Changes in Set Pressure:</label><input type="text" /></div>
+      <div class="form-group"><label>Authorization Ref No & Date:</label><input type="text" /></div>
+      <div class="form-group"><label>Cold Differential Test Pressure:</label><input type="text" /></div>
+      <div class="form-group"><label>Back Pressure:</label><input type="text" /></div>
+      <div class="form-group"><label>Set Pressure:</label><input type="text" /></div>
+      <div class="form-group"><label>Orifice Size:</label><input type="text" /></div>
+      <div class="form-group"><label>Testing Medium:</label><input type="text" /></div>
+      <div class="form-group"><label>Reason for Calibration:</label><input type="text" id="reasonInput" /></div>
+      <div class="form-group"><label>Repairs & Replacements:</label><input type="text" /></div>
+    </div>
 
-    e.target.reset();
-  });
+    <table id="testTable">
+      <thead>
+        <tr>
+          <th>Relieving Pressure</th>
+          <th>Set Pressure</th>
+          <th>Holding Time</th>
+          <th>Max Bubbles</th>
+          <th>Observed Bubbles</th>
+          <th>Status</th>
+          <th>Remarks</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><input type="text" /></td>
+          <td><input type="text" /></td>
+          <td><input type="text" /></td>
+          <td><input type="text" /></td>
+          <td><input type="text" /></td>
+          <td><select><option>Accepted</option><option>Rejected</option></select></td>
+          <td><input type="text" /></td>
+        </tr>
+      </tbody>
+    </table>
 
-  function addRow(index) {
-    const entry = psvDataList[index];
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>${entry.date}</td>
-      <td><a href="#" onclick="showDetails(${index})">${entry.tag}</a></td>
-      <td>${entry.setPressure}</td>
-      <td>${entry.status}</td>
-      <td>${entry.witness}</td>
-    `;
-    document.querySelector("#psvTable tbody").appendChild(row);
-  }
+    <div class="form-group"><label>Weather sealed after calibration:</label>
+      <select><option>Yes</option><option>No</option></select>
+    </div>
 
-  function updateTable() {
-    const tbody = document.querySelector("#psvTable tbody");
-    tbody.innerHTML = "";
-    psvDataList.forEach((_, i) => addRow(i));
-  }
+    <div class="footer">
+      <div>
+        <label>Witnessed by:</label><br><input type="text" id="witnessInput" /><br>
+        <label>Signature:</label><br><input type="text" />
+      </div>
+      <div>
+        <label>Next Due Date:</label><br><input type="date" />
+      </div>
+    </div>
 
-  window.showDetails = function (index) {
-    selectedIndex = index;
-    const entry = psvDataList[index];
-    let html = `<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">`;
-    for (let key in entry) {
-      const label = key.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase());
-      html += `<div style="font-weight:bold;">${label}:</div><div>${entry[key]}</div>`;
-    }
-    html += `</div>`;
-    document.getElementById("modalContent").innerHTML = html;
-    document.getElementById("psvModal").style.display = "block";
-  };
+    <div class="note">Doc. No.: NRL/REC/09-02 | Rev: 01 | Page: 1 of 1</div>
 
-  window.editEntry = function () {
-    if (selectedIndex !== null) {
-      const entry = psvDataList[selectedIndex];
-      for (let key in entry) {
-        const input = document.querySelector(`[name="${key}"]`);
-        if (input) input.value = entry[key];
-      }
-      closeModal();
-    }
-  };
+    <div class="btn-row">
+      <button id="editBtn" onclick="enableEditing()" style="display:none;">✏️ Edit</button>
+      <button onclick="saveData()">💾 Save Entry</button>
+    </div>
+  </div>
+</div>
 
-  window.deleteEntry = function () {
-    if (selectedIndex !== null) {
-      if (confirm("Are you sure you want to delete this entry?")) {
-        psvDataList.splice(selectedIndex, 1);
-        updateTable();
-        closeModal();
-      }
-    }
-  };
+<!-- View Card -->
+<div id="viewCard" class="card">
+  <h2>📋 PSV Records</h2>
+  <table class="record-table" id="recordList">
+    <thead>
+      <tr>
+        <th>Tag No</th>
+        <th>Reason</th>
+        <th>Date</th>
+        <th>Witnessed By</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
 
-  window.closeModal = function () {
-    document.getElementById("psvModal").style.display = "none";
-    selectedIndex = null;
-  };
-
-  // Hide logout if no firebase
-  function logout() {}
-</script>
+<script src="script.js"></script>
+</body>
+</html>
