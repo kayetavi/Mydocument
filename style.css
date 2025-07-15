@@ -92,3 +92,76 @@ button:hover {
 .form.active {
   display: block;
 }
+
+
+
+
+
+
+body {
+  font-family: Arial, sans-serif;
+  margin: 20px;
+}
+.btn-row {
+  margin-bottom: 20px;
+}
+.card {
+  display: none;
+}
+.visible {
+  display: block;
+}
+.container {
+  border: 1px solid #ccc;
+  padding: 20px;
+}
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.form-group {
+  display: flex;
+}
+.form-group label {
+  width: 180px;
+  font-weight: bold;
+}
+input, select {
+  width: 100%;
+  padding: 4px;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+table, th, td {
+  border: 1px solid #aaa;
+}
+th, td {
+  padding: 5px;
+  text-align: center;
+}
+.footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+.note {
+  font-size: 12px;
+  margin-top: 20px;
+}
+.record-table th, .record-table td {
+  padding: 5px;
+  border: 1px solid #999;
+}
+.record-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+button {
+  padding: 6px 10px;
+  margin-right: 5px;
+}
