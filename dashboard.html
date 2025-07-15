@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Document Dashboard</title>
+  <title>PSV Calibration Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     body {
@@ -13,7 +13,7 @@
     .form-container {
       border: 2px solid #000;
       padding: 20px;
-      margin-top: 40px;
+      margin-top: 20px;
     }
 
     .form-grid {
@@ -47,23 +47,10 @@
       text-align: center;
     }
 
-    .footer {
+    .footer, .signature {
       display: flex;
       justify-content: space-between;
-      margin-top: 20px;
-    }
-
-    .signature {
-      margin-top: 20px;
-    }
-
-    .signature label {
-      font-weight: bold;
-    }
-
-    .note {
-      font-size: 12px;
-      margin-top: 10px;
+      gap: 20px;
     }
 
     input, select {
@@ -71,103 +58,111 @@
       padding: 4px;
     }
 
-    iframe {
-      border: 1px solid #ccc;
+    .note {
+      font-size: 12px;
+      margin-top: 10px;
+    }
+
+    #psvTable {
+      margin-top: 30px;
+    }
+
+    .btn {
+      margin-top: 10px;
+      padding: 8px 16px;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
-  <h1>🎉 Welcome to Your Document Dashboard!</h1>
+  <h1>🔧 PSV Calibration Dashboard</h1>
   <p id="user-info">Loading user info...</p>
   <button onclick="logout()">Logout</button>
 
-  <hr />
-
-  <h2>📁 Upload PDF/Excel</h2>
-  <input type="file" id="fileInput" />
-  <button onclick="uploadFile()">Upload</button>
-
-  <h3 id="fileLink"></h3>
-  <iframe id="filePreview" width="100%" height="500px" style="margin-top: 20px;"></iframe>
-
-  <!-- 🔧 Safety Valve Calibration Form -->
+  <!-- Calibration Form -->
   <div class="form-container">
     <h2 style="text-align: center;">Safety Valve Calibration Report</h2>
-    <div class="form-grid">
-      <div class="form-group"><label>Date:</label><input type="date" /></div>
-      <div class="form-group"><label>Time:</label><input type="time" /></div>
-      <div class="form-group"><label>Unit:</label><input type="text" /></div>
-      <div class="form-group"><label>Tag No:</label><input type="text" /></div>
-      <div class="form-group"><label>Type:</label>
-        <select><option>Conventional</option><option>Balanced Bellow</option><option>Open Bonnet</option></select>
+    <form id="psvForm">
+      <div class="form-grid">
+        <div class="form-group"><label>Date:</label><input type="date" name="date" /></div>
+        <div class="form-group"><label>Time:</label><input type="time" name="time" /></div>
+        <div class="form-group"><label>Unit:</label><input type="text" name="unit" /></div>
+        <div class="form-group"><label>Tag No:</label><input type="text" name="tag" /></div>
+        <div class="form-group"><label>Type:</label>
+          <select name="type">
+            <option>Conventional</option><option>Balanced Bellow</option><option>Open Bonnet</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Manufacturer:</label><input type="text" name="manufacturer" /></div>
+        <div class="form-group"><label>Service:</label><input type="text" name="service" /></div>
+        <div class="form-group"><label>Work Order No:</label><input type="text" name="workOrder" /></div>
+        <div class="form-group"><label>Work Order Date:</label><input type="date" name="workDate" /></div>
+        <div class="form-group"><label>Changes in Set Pressure:</label><input type="text" name="changeSetPressure" /></div>
+        <div class="form-group"><label>Authorization Ref No & Date:</label><input type="text" name="authRef" /></div>
+        <div class="form-group"><label>Cold Diff. Test Pressure:</label><input type="text" name="coldDiff" /></div>
+        <div class="form-group"><label>Back Pressure:</label><input type="text" name="backPressure" /></div>
+        <div class="form-group"><label>Set Pressure:</label><input type="text" name="setPressure" /></div>
+        <div class="form-group"><label>Orifice Size:</label><input type="text" name="orifice" /></div>
+        <div class="form-group"><label>Testing Medium:</label><input type="text" name="medium" /></div>
+        <div class="form-group"><label>Calibration Reason:</label><input type="text" name="reason" /></div>
+        <div class="form-group"><label>Repairs & Replacements:</label><input type="text" name="repairs" /></div>
       </div>
-      <div class="form-group"><label>Manufacturer:</label><input type="text" /></div>
-      <div class="form-group"><label>Service:</label><input type="text" /></div>
-      <div class="form-group"><label>Work Order No:</label><input type="text" /></div>
-      <div class="form-group"><label>Work Order Date:</label><input type="date" /></div>
-      <div class="form-group"><label>Changes in Set Pressure:</label><input type="text" /></div>
-      <div class="form-group"><label>Authorization Ref No & Date:</label><input type="text" /></div>
-      <div class="form-group"><label>Cold Diff. Test Pressure:</label><input type="text" /></div>
-      <div class="form-group"><label>Back Pressure:</label><input type="text" /></div>
-      <div class="form-group"><label>Set Pressure:</label><input type="text" /></div>
-      <div class="form-group"><label>Orifice Size:</label><input type="text" /></div>
-      <div class="form-group"><label>Testing Medium:</label><input type="text" /></div>
-      <div class="form-group"><label>Calibration Reason:</label><input type="text" /></div>
-      <div class="form-group"><label>Repairs & Replacements:</label><input type="text" /></div>
-    </div>
 
-    <table>
-      <thead>
-        <tr>
-          <th rowspan="2">As Received Relieving Pressure (Kg/cm²)</th>
-          <th rowspan="2">Set at Kg/cm² (g)</th>
-          <th rowspan="2">Holding Time (Min)</th>
-          <th colspan="2">Bubbles per min.</th>
-          <th rowspan="2">Status</th>
-          <th rowspan="2">Remarks (if any)</th>
-        </tr>
-        <tr>
-          <th>Max Permissible</th>
-          <th>Observed</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td><input type="text" /></td>
-          <td><input type="text" /></td>
-          <td><input type="text" /></td>
-          <td><input type="text" /></td>
-          <td><input type="text" /></td>
-          <td><select><option>Accepted</option><option>Rejected</option></select></td>
-          <td><input type="text" /></td>
-        </tr>
-      </tbody>
-    </table>
+      <table>
+        <thead>
+          <tr>
+            <th rowspan="2">As Received Relieving Pressure</th>
+            <th rowspan="2">Set at Kg/cm²</th>
+            <th rowspan="2">Holding Time</th>
+            <th colspan="2">Bubbles per min.</th>
+            <th rowspan="2">Status</th>
+            <th rowspan="2">Remarks</th>
+          </tr>
+          <tr>
+            <th>Max</th>
+            <th>Observed</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><input type="text" name="relieving" /></td>
+            <td><input type="text" name="setAt" /></td>
+            <td><input type="text" name="holdTime" /></td>
+            <td><input type="text" name="bubbleMax" /></td>
+            <td><input type="text" name="bubbleObs" /></td>
+            <td><select name="status"><option>Accepted</option><option>Rejected</option></select></td>
+            <td><input type="text" name="remarks" /></td>
+          </tr>
+        </tbody>
+      </table>
 
-    <div class="form-group">
-      <label>Weather sealed after calibration:</label>
-      <select><option>Yes</option><option>No</option></select>
-    </div>
-
-    <div class="footer">
-      <div>
-        <label>Witnessed by:</label><br/>
-        <input type="text" /><br/>
-        <label>Signature:</label><br/>
-        <input type="text" />
+      <div class="form-group">
+        <label>Weather sealed after calibration:</label>
+        <select name="sealed"><option>Yes</option><option>No</option></select>
       </div>
-      <div>
-        <label>Next Due Date:</label><br/>
-        <input type="date" />
-      </div>
-    </div>
 
-    <div class="signature">
-      <label>Name (Officer Inspection):</label>
-      <input type="text" /><br/>
-      <label>Date:</label>
-      <input type="date" />
-    </div>
+      <div class="footer">
+        <div>
+          <label>Witnessed by:</label>
+          <input type="text" name="witness" /><br/>
+          <label>Signature:</label>
+          <input type="text" name="signature" />
+        </div>
+        <div>
+          <label>Next Due Date:</label><br/>
+          <input type="date" name="nextDue" />
+        </div>
+      </div>
+
+      <div class="signature">
+        <label>Name (Officer Inspection):</label>
+        <input type="text" name="officer" />
+        <label>Date:</label>
+        <input type="date" name="inspectionDate" />
+      </div>
+
+      <button type="submit" class="btn">➕ Add PSV Entry</button>
+    </form>
 
     <div class="note">
       White - Inspection, Yellow - Workshop, Green - Field Maint, Pink - Process<br/>
@@ -175,7 +170,23 @@
     </div>
   </div>
 
-  <!-- 🔥 Firebase Scripts -->
+  <!-- 📋 Table to Store Multiple Entries -->
+  <h3>🗂️ PSV Entry List</h3>
+  <table id="psvTable">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Tag No</th>
+        <th>Set Pressure</th>
+        <th>Status</th>
+        <th>Witness</th>
+      </tr>
+    </thead>
+    <tbody>
+    </tbody>
+  </table>
+
+  <!-- 🔥 Firebase Auth Only -->
   <script type="module">
     import { app } from './firebase.js';
     import {
@@ -184,15 +195,7 @@
       signOut
     } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 
-    import {
-      getStorage,
-      ref,
-      uploadBytesResumable,
-      getDownloadURL
-    } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js';
-
     const auth = getAuth(app);
-    const storage = getStorage(app);
 
     onAuthStateChanged(auth, user => {
       if (user) {
@@ -208,49 +211,21 @@
       });
     };
 
-    window.uploadFile = function () {
-      const file = document.getElementById("fileInput").files[0];
-      if (!file) {
-        alert("Please select a file.");
-        return;
-      }
-
-      const userEmail = auth.currentUser.email.replace(/\./g, '_');
-      const path = `documents/${userEmail}/${file.name}`;
-      const storageRef = ref(storage, path);
-      const uploadTask = uploadBytesResumable(storageRef, file);
-
-      console.log("Uploading:", path);
-
-      uploadTask.on('state_changed',
-        (snapshot) => {
-          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          console.log('Upload is ' + progress.toFixed(2) + '% done');
-        },
-        (error) => {
-          alert("Upload failed: " + error.message);
-          console.error("Upload error:", error);
-        },
-        () => {
-          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-            console.log("Download URL:", downloadURL);
-
-            document.getElementById("fileLink").innerHTML =
-              `<strong>✅ Uploaded:</strong> <a href="${downloadURL}" target="_blank">${file.name}</a>`;
-
-            const ext = file.name.split('.').pop().toLowerCase();
-            if (ext === "pdf") {
-              document.getElementById("filePreview").src = downloadURL;
-            } else {
-              document.getElementById("filePreview").src = "";
-            }
-          }).catch(error => {
-            console.error("Error getting download URL:", error);
-            alert("Download URL not available.");
-          });
-        }
-      );
-    };
+    // 🚀 Add PSV to table
+    document.getElementById("psvForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const data = new FormData(e.target);
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${data.get("date")}</td>
+        <td>${data.get("tag")}</td>
+        <td>${data.get("setPressure")}</td>
+        <td>${data.get("status")}</td>
+        <td>${data.get("witness")}</td>
+      `;
+      document.querySelector("#psvTable tbody").appendChild(row);
+      e.target.reset();
+    });
   </script>
 </body>
 </html>
