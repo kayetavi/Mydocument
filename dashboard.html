@@ -1,300 +1,86 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>PSV Calibration Dashboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <style>
-    body {
-      font-family: Arial;
-      padding: 20px;
+<script>
+  const psvDataList = [];
+  let selectedIndex = null;
+
+  document.getElementById('user-info').innerText = `Local Mode - No Login`;
+  document.querySelector('button[onclick="logout()"]').style.display = "none";
+
+  document.getElementById("psvForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    const data = new FormData(e.target);
+    const entry = {};
+    data.forEach((value, key) => entry[key] = value);
+
+    if (selectedIndex !== null) {
+      psvDataList[selectedIndex] = entry;
+      updateTable();
+      selectedIndex = null;
+    } else {
+      psvDataList.push(entry);
+      addRow(psvDataList.length - 1);
     }
 
-    .form-container {
-      border: 2px solid #000;
-      padding: 20px;
-      margin-top: 20px;
+    e.target.reset();
+  });
+
+  function addRow(index) {
+    const entry = psvDataList[index];
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${entry.date}</td>
+      <td><a href="#" onclick="showDetails(${index})">${entry.tag}</a></td>
+      <td>${entry.setPressure}</td>
+      <td>${entry.status}</td>
+      <td>${entry.witness}</td>
+    `;
+    document.querySelector("#psvTable tbody").appendChild(row);
+  }
+
+  function updateTable() {
+    const tbody = document.querySelector("#psvTable tbody");
+    tbody.innerHTML = "";
+    psvDataList.forEach((_, i) => addRow(i));
+  }
+
+  window.showDetails = function (index) {
+    selectedIndex = index;
+    const entry = psvDataList[index];
+    let html = `<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">`;
+    for (let key in entry) {
+      const label = key.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase());
+      html += `<div style="font-weight:bold;">${label}:</div><div>${entry[key]}</div>`;
     }
+    html += `</div>`;
+    document.getElementById("modalContent").innerHTML = html;
+    document.getElementById("psvModal").style.display = "block";
+  };
 
-    .form-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-
-    .form-group {
-      display: flex;
-    }
-
-    .form-group label {
-      width: 180px;
-      font-weight: bold;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 20px;
-    }
-
-    table, th, td {
-      border: 1px solid #000;
-    }
-
-    th, td {
-      padding: 5px;
-      text-align: center;
-    }
-
-    .footer, .signature {
-      display: flex;
-      justify-content: space-between;
-      gap: 20px;
-    }
-
-    input, select {
-      width: 100%;
-      padding: 4px;
-    }
-
-    .note {
-      font-size: 12px;
-      margin-top: 10px;
-    }
-
-    .btn {
-      margin-top: 10px;
-      padding: 8px 16px;
-      font-weight: bold;
-    }
-
-    #psvModal {
-      display: none;
-      position: fixed;
-      top: 10%;
-      left: 10%;
-      width: 80%;
-      background: #fff;
-      padding: 20px;
-      border: 2px solid #000;
-      z-index: 1000;
-    }
-  </style>
-</head>
-<body>
-  <h1>🔧 PSV Calibration Dashboard</h1>
-  <p id="user-info">Loading user info...</p>
-  <button onclick="logout()">Logout</button>
-
-  <div class="form-container">
-    <h2 style="text-align: center;">Safety Valve Calibration Report</h2>
-    <form id="psvForm">
-      <div class="form-grid">
-        <div class="form-group"><label>Date:</label><input type="date" name="date" /></div>
-        <div class="form-group"><label>Time:</label><input type="time" name="time" /></div>
-        <div class="form-group"><label>Unit:</label><input type="text" name="unit" /></div>
-        <div class="form-group"><label>Tag No:</label><input type="text" name="tag" /></div>
-        <div class="form-group"><label>Type:</label>
-          <select name="type"><option>Conventional</option><option>Balanced Bellow</option><option>Open Bonnet</option></select>
-        </div>
-        <div class="form-group"><label>Manufacturer:</label><input type="text" name="manufacturer" /></div>
-        <div class="form-group"><label>Service:</label><input type="text" name="service" /></div>
-        <div class="form-group"><label>Work Order No:</label><input type="text" name="workOrder" /></div>
-        <div class="form-group"><label>Work Order Date:</label><input type="date" name="workDate" /></div>
-        <div class="form-group"><label>Changes in Set Pressure:</label><input type="text" name="changeSetPressure" /></div>
-        <div class="form-group"><label>Authorization Ref No & Date:</label><input type="text" name="authRef" /></div>
-        <div class="form-group"><label>Cold Diff. Test Pressure:</label><input type="text" name="coldDiff" /></div>
-        <div class="form-group"><label>Back Pressure:</label><input type="text" name="backPressure" /></div>
-        <div class="form-group"><label>Set Pressure:</label><input type="text" name="setPressure" /></div>
-        <div class="form-group"><label>Orifice Size:</label><input type="text" name="orifice" /></div>
-        <div class="form-group"><label>Testing Medium:</label><input type="text" name="medium" /></div>
-        <div class="form-group"><label>Calibration Reason:</label><input type="text" name="reason" /></div>
-        <div class="form-group"><label>Repairs & Replacements:</label><input type="text" name="repairs" /></div>
-      </div>
-
-      <table>
-        <thead>
-          <tr>
-            <th rowspan="2">As Received Relieving Pressure</th>
-            <th rowspan="2">Set at Kg/cm²</th>
-            <th rowspan="2">Holding Time</th>
-            <th colspan="2">Bubbles per min.</th>
-            <th rowspan="2">Status</th>
-            <th rowspan="2">Remarks</th>
-          </tr>
-          <tr>
-            <th>Max</th><th>Observed</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><input type="text" name="relieving" /></td>
-            <td><input type="text" name="setAt" /></td>
-            <td><input type="text" name="holdTime" /></td>
-            <td><input type="text" name="bubbleMax" /></td>
-            <td><input type="text" name="bubbleObs" /></td>
-            <td><select name="status"><option>Accepted</option><option>Rejected</option></select></td>
-            <td><input type="text" name="remarks" /></td>
-          </tr>
-        </tbody>
-      </table>
-
-      <div class="form-group"><label>Weather sealed after calibration:</label>
-        <select name="sealed"><option>Yes</option><option>No</option></select>
-      </div>
-
-      <div class="footer">
-        <div>
-          <label>Witnessed by:</label>
-          <input type="text" name="witness" /><br />
-          <label>Signature:</label>
-          <input type="text" name="signature" />
-        </div>
-        <div>
-          <label>Next Due Date:</label><br />
-          <input type="date" name="nextDue" />
-        </div>
-      </div>
-
-      <div class="signature">
-        <label>Name (Officer Inspection):</label>
-        <input type="text" name="officer" />
-        <label>Date:</label>
-        <input type="date" name="inspectionDate" />
-      </div>
-
-      <button type="submit" class="btn">➕ Add PSV Entry</button>
-    </form>
-  </div>
-
-  <!-- List Table -->
-  <h3>🗂️ PSV Entry List</h3>
-  <table id="psvTable">
-    <thead>
-      <tr>
-        <th>Date</th>
-        <th>Tag No</th>
-        <th>Set Pressure</th>
-        <th>Status</th>
-        <th>Witness</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-
-  <!-- Modal -->
-  <div id="psvModal">
-    <h3>🔍 PSV Entry Details</h3>
-    <div id="modalContent" style="max-height:400px; overflow-y:auto;"></div>
-    <div style="margin-top: 10px;">
-      <button onclick="editEntry()" style="margin-right:10px;">✏️ Edit</button>
-      <button onclick="deleteEntry()" style="margin-right:10px;">🗑️ Delete</button>
-      <button onclick="closeModal()">Close</button>
-    </div>
-  </div>
-
-  <script type="module">
-    import { app } from './firebase.js';
-    import {
-      getAuth,
-      onAuthStateChanged,
-      signOut
-    } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-
-    const auth = getAuth(app);
-    const psvDataList = [];
-    let selectedIndex = null;
-
-    onAuthStateChanged(auth, user => {
-      if (user) {
-        document.getElementById('user-info').innerText = `Logged in as: ${user.email}`;
-      } else {
-        window.location.href = 'index.html';
-      }
-    });
-
-    window.logout = function () {
-      signOut(auth).then(() => {
-        window.location.href = 'index.html';
-      });
-    };
-
-    document.getElementById("psvForm").addEventListener("submit", function (e) {
-      e.preventDefault();
-      const data = new FormData(e.target);
-      const entry = {};
-      data.forEach((value, key) => entry[key] = value);
-
-      if (selectedIndex !== null) {
-        psvDataList[selectedIndex] = entry;
-        updateTable();
-        selectedIndex = null;
-      } else {
-        psvDataList.push(entry);
-        addRow(psvDataList.length - 1);
-      }
-
-      e.target.reset();
-    });
-
-    function addRow(index) {
-      const entry = psvDataList[index];
-      const row = document.createElement("tr");
-      row.innerHTML = `
-        <td>${entry.date}</td>
-        <td><a href="#" onclick="showDetails(${index})">${entry.tag}</a></td>
-        <td>${entry.setPressure}</td>
-        <td>${entry.status}</td>
-        <td>${entry.witness}</td>
-      `;
-      document.querySelector("#psvTable tbody").appendChild(row);
-    }
-
-    function updateTable() {
-      const tbody = document.querySelector("#psvTable tbody");
-      tbody.innerHTML = "";
-      psvDataList.forEach((_, i) => addRow(i));
-    }
-
-    window.showDetails = function (index) {
-      selectedIndex = index;
-      const entry = psvDataList[index];
-      let html = `<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">`;
+  window.editEntry = function () {
+    if (selectedIndex !== null) {
+      const entry = psvDataList[selectedIndex];
       for (let key in entry) {
-        const label = key.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase());
-        html += `<div style="font-weight:bold;">${label}:</div><div>${entry[key]}</div>`;
+        const input = document.querySelector(`[name="${key}"]`);
+        if (input) input.value = entry[key];
       }
-      html += `</div>`;
-      document.getElementById("modalContent").innerHTML = html;
-      document.getElementById("psvModal").style.display = "block";
-    };
+      closeModal();
+    }
+  };
 
-    window.editEntry = function () {
-      if (selectedIndex !== null) {
-        const entry = psvDataList[selectedIndex];
-        for (let key in entry) {
-          const input = document.querySelector(`[name="${key}"]`);
-          if (input) input.value = entry[key];
-        }
+  window.deleteEntry = function () {
+    if (selectedIndex !== null) {
+      if (confirm("Are you sure you want to delete this entry?")) {
+        psvDataList.splice(selectedIndex, 1);
+        updateTable();
         closeModal();
       }
-    };
+    }
+  };
 
-    window.deleteEntry = function () {
-      if (selectedIndex !== null) {
-        if (confirm("Are you sure you want to delete this entry?")) {
-          psvDataList.splice(selectedIndex, 1);
-          updateTable();
-          closeModal();
-        }
-      }
-    };
+  window.closeModal = function () {
+    document.getElementById("psvModal").style.display = "none";
+    selectedIndex = null;
+  };
 
-    window.closeModal = function () {
-      document.getElementById("psvModal").style.display = "none";
-      selectedIndex = null;
-    };
-  </script>
-</body>
-</html>
+  // Hide logout if no firebase
+  function logout() {}
+</script>
