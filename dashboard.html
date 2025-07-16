@@ -19,6 +19,9 @@
       padding: 10px;
       border-right: 1px solid #ccc;
     }
+    .sidebar h3 {
+      margin-top: 0;
+    }
     .sidebar ul {
       list-style: none;
       padding: 0;
@@ -45,22 +48,6 @@
       height: 95vh;
       border: 1px solid #ccc;
       cursor: grab;
-    }
-    .blink-glow {
-      animation: blink 1s infinite alternate;
-      filter: drop-shadow(0 0 6px #00ffff) drop-shadow(0 0 12px red);
-    }
-    @keyframes blink {
-      from {
-        fill: red;
-        stroke: #00ffff;
-        stroke-width: 3px;
-      }
-      to {
-        fill: #00ffff;
-        stroke: red;
-        stroke-width: 3px;
-      }
     }
   </style>
 </head>
@@ -93,30 +80,51 @@ document.addEventListener("DOMContentLoaded", () => {
     const svgDoc = svgObject.contentDocument;
     const svgRoot = svgDoc.querySelector("svg");
 
-    // ✅ Highlight Logic
+    // ✅ Highlight + Glow Logic
     dmListItems.forEach(item => {
       item.addEventListener("click", () => {
         const selectedDM = item.getAttribute("data-dm").trim();
         console.clear();
         console.log("Selected DM:", selectedDM);
 
+        // Clear old blinking
         blinkIntervals.forEach(interval => clearInterval(interval));
         blinkIntervals = [];
 
+        // Reset old styles
         svgDoc.querySelectorAll("text, tspan").forEach(txt => {
-          txt.classList.remove("blink-glow");
           txt.style.fill = "";
           txt.style.stroke = "";
           txt.style.strokeWidth = "";
           txt.style.filter = "";
         });
 
+        // Highlight + Blink + Glow
         let count = 0;
         svgDoc.querySelectorAll("text, tspan").forEach(txt => {
           const cleanText = txt.textContent.replace(/\s+/g, '').trim();
           if (cleanText === selectedDM) {
-            txt.classList.add("blink-glow");
             count++;
+            let visible = true;
+
+            const interval = setInterval(() => {
+              if (visible) {
+                txt.style.fill = "red";
+                txt.style.stroke = "#00ffff";
+                txt.style.strokeWidth = "3px";
+                txt.style.filter =
+                  "drop-shadow(0 0 6px #00ffff) drop-shadow(0 0 12px red)";
+              } else {
+                txt.style.fill = "#00ffff";
+                txt.style.stroke = "red";
+                txt.style.strokeWidth = "3px";
+                txt.style.filter =
+                  "drop-shadow(0 0 6px red) drop-shadow(0 0 12px #00ffff)";
+              }
+              visible = !visible;
+            }, 500);
+
+            blinkIntervals.push(interval);
           }
         });
 
@@ -143,6 +151,11 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     svgObject.addEventListener("mouseup", () => {
+      isPanning = false;
+      svgObject.style.cursor = "grab";
+    });
+
+    svgObject.addEventListener("mouseleave", () => {
       isPanning = false;
       svgObject.style.cursor = "grab";
     });
