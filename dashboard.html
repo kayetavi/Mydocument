@@ -91,8 +91,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   svgObject.addEventListener("load", () => {
     const svgDoc = svgObject.contentDocument;
-    const svgRoot = svgDoc.querySelector("svg");
-    const originalViewBox = svgRoot.getAttribute("viewBox"); // Store original viewBox
 
     dmListItems.forEach(item => {
       item.addEventListener("click", () => {
@@ -100,16 +98,15 @@ document.addEventListener("DOMContentLoaded", () => {
         console.clear();
         console.log("Selected DM:", selectedDM);
 
-        // ✅ Remove previous effects
+        // ✅ Remove old effects
         svgDoc.querySelectorAll("text, tspan").forEach(txt => {
           txt.classList.remove("blink-glow");
-          txt.style.transform = "";
         });
 
-        let count = 0;
         let firstElement = null;
+        let count = 0;
 
-        // ✅ Highlight + Glow
+        // ✅ Highlight & Glow
         svgDoc.querySelectorAll("text, tspan").forEach(txt => {
           const cleanText = txt.textContent.replace(/\s+/g, '').trim();
           if (cleanText === selectedDM) {
@@ -121,29 +118,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
         console.log("Matched Elements:", count);
 
-        // ✅ Auto-Zoom (Safe)
+        // ✅ Smooth Scroll (No ViewBox Change)
         if (firstElement) {
-          try {
-            const bbox = firstElement.getBBox();
-            const zoomLevel = 2; // 2x zoom
-
-            const centerX = bbox.x + bbox.width / 2;
-            const centerY = bbox.y + bbox.height / 2;
-
-            const viewWidth = svgRoot.viewBox.baseVal.width / zoomLevel;
-            const viewHeight = svgRoot.viewBox.baseVal.height / zoomLevel;
-
-            svgRoot.setAttribute(
-              "viewBox",
-              `${centerX - viewWidth / 2} ${centerY - viewHeight / 2} ${viewWidth} ${viewHeight}`
-            );
-          } catch (e) {
-            console.error("Zoom failed, resetting to original viewBox", e);
-            svgRoot.setAttribute("viewBox", originalViewBox);
-          }
-        } else {
-          // Reset to original if no match
-          svgRoot.setAttribute("viewBox", originalViewBox);
+          const bbox = firstElement.getBoundingClientRect();
+          const svgBox = svgObject.getBoundingClientRect();
+          const scrollTop = window.scrollY + bbox.top - svgBox.top - 200;
+          window.scrollTo({ top: scrollTop, behavior: "smooth" });
         }
       });
     });
