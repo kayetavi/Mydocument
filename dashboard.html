@@ -36,13 +36,31 @@
     .drawing {
       flex: 1;
       padding: 10px;
-      overflow: auto;
+      overflow: hidden;
       background: #fff;
+      position: relative;
     }
     #svgObject {
       width: 100%;
       height: 95vh;
       border: 1px solid #ccc;
+      cursor: grab;
+    }
+    .blink-glow {
+      animation: blink 1s infinite alternate;
+      filter: drop-shadow(0 0 6px #00ffff) drop-shadow(0 0 12px red);
+    }
+    @keyframes blink {
+      from {
+        fill: red;
+        stroke: #00ffff;
+        stroke-width: 3px;
+      }
+      to {
+        fill: #00ffff;
+        stroke: red;
+        stroke-width: 3px;
+      }
     }
   </style>
 </head>
@@ -73,60 +91,81 @@ document.addEventListener("DOMContentLoaded", () => {
 
   svgObject.addEventListener("load", () => {
     const svgDoc = svgObject.contentDocument;
+    const svgRoot = svgDoc.querySelector("svg");
 
+    // ✅ Highlight Logic
     dmListItems.forEach(item => {
       item.addEventListener("click", () => {
         const selectedDM = item.getAttribute("data-dm").trim();
         console.clear();
         console.log("Selected DM:", selectedDM);
 
-        // ✅ Clear previous blink intervals
         blinkIntervals.forEach(interval => clearInterval(interval));
         blinkIntervals = [];
 
-        // ✅ Reset old styles
         svgDoc.querySelectorAll("text, tspan").forEach(txt => {
+          txt.classList.remove("blink-glow");
           txt.style.fill = "";
           txt.style.stroke = "";
           txt.style.strokeWidth = "";
           txt.style.filter = "";
         });
 
-        // ✅ Highlight + Strong Glow + Blink
         let count = 0;
         svgDoc.querySelectorAll("text, tspan").forEach(txt => {
           const cleanText = txt.textContent.replace(/\s+/g, '').trim();
           if (cleanText === selectedDM) {
+            txt.classList.add("blink-glow");
             count++;
-
-            let visible = true;
-            const interval = setInterval(() => {
-              if (visible) {
-                txt.style.fill = "red";
-                txt.style.stroke = "#00ffff"; // Cyan outline
-                txt.style.strokeWidth = "3px";
-                txt.style.filter =
-                  "drop-shadow(0 0 6px #00ffff) drop-shadow(0 0 12px red)";
-              } else {
-                txt.style.fill = "#00ffff"; // Cyan fill
-                txt.style.stroke = "red";
-                txt.style.strokeWidth = "3px";
-                txt.style.filter =
-                  "drop-shadow(0 0 6px red) drop-shadow(0 0 12px #00ffff)";
-              }
-              visible = !visible;
-            }, 500);
-
-            blinkIntervals.push(interval);
           }
         });
 
         console.log("Matched Elements:", count);
       });
     });
+
+    // ✅ Manual Zoom & Pan
+    let viewBox = svgRoot.viewBox.baseVal;
+    if (!viewBox || viewBox.width === 0 || viewBox.height === 0) {
+      const vb = svgRoot.getBBox();
+      svgRoot.setAttribute("viewBox", `${vb.x} ${vb.y} ${vb.width} ${vb.height}`);
+      viewBox = svgRoot.viewBox.baseVal;
+    }
+
+    let isPanning = false;
+    let startX, startY;
+
+    svgObject.addEventListener("mousedown", (e) => {
+      isPanning = true;
+      startX = e.clientX;
+      startY = e.clientY;
+      svgObject.style.cursor = "grabbing";
+    });
+
+    svgObject.addEventListener("mouseup", () => {
+      isPanning = false;
+      svgObject.style.cursor = "grab";
+    });
+
+    svgObject.addEventListener("mousemove", (e) => {
+      if (!isPanning) return;
+      const dx = (e.clientX - startX) * (viewBox.width / svgObject.clientWidth);
+      const dy = (e.clientY - startY) * (viewBox.height / svgObject.clientHeight);
+      viewBox.x -= dx;
+      viewBox.y -= dy;
+      startX = e.clientX;
+      startY = e.clientY;
+    });
+
+    svgObject.addEventListener("wheel", (e) => {
+      e.preventDefault();
+      const zoomFactor = 1.1;
+      const scale = e.deltaY < 0 ? 1 / zoomFactor : zoomFactor;
+      viewBox.width *= scale;
+      viewBox.height *= scale;
+    });
   });
 });
 </script>
-
 </body>
 </html>
