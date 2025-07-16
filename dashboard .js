@@ -1,29 +1,55 @@
-let records = JSON.parse(localStorage.getItem("psvRecords")) || [];
+// ✅ SAFETY VALVE DASHBOARD - FIXED VERSION
+
+// ✅ Load records safely from localStorage
+let records = [];
+try {
+  records = JSON.parse(localStorage.getItem("psvRecords")) || [];
+} catch (e) {
+  console.error("Corrupted storage, resetting...");
+  localStorage.setItem("psvRecords", JSON.stringify([]));
+  records = [];
+}
+
 let isEditing = true;
 
+// ✅ Show Entry or View Card
 function showCard(id) {
   document.querySelectorAll(".card").forEach(c => c.classList.remove("visible"));
   document.getElementById(id).classList.add("visible");
+
   if (id === "viewCard") updateRecordList();
   if (id === "entryCard") {
     isEditing = true;
     document.getElementById("editBtn").style.display = "none";
     document.getElementById("currentEditTag").value = "";
+    clearForm();
     setFormEditable(true);
   }
 }
 
+// ✅ Enable / Disable form fields
 function setFormEditable(editable) {
-  const inputs = document.querySelectorAll("#entryCard input, #entryCard select");
-  inputs.forEach(i => i.disabled = !editable);
+  document.querySelectorAll("#entryCard input, #entryCard select")
+    .forEach(i => i.disabled = !editable);
 }
 
+// ✅ Enable editing an existing record
 function enableEditing() {
   isEditing = true;
   setFormEditable(true);
   document.getElementById("editBtn").style.display = "none";
 }
 
+// ✅ Clear form after saving new record
+function clearForm() {
+  document.querySelectorAll("#entryCard input, #entryCard select").forEach(e => {
+    if (e.type === "date" || e.type === "time" || e.tagName === "SELECT" || e.type === "text") {
+      e.value = "";
+    }
+  });
+}
+
+// ✅ Save record to localStorage
 function saveData() {
   if (!isEditing) {
     alert("Click 'Edit' to enable editing.");
@@ -42,26 +68,31 @@ function saveData() {
 
   const formData = {
     tag,
-    fields: Array.from(document.querySelectorAll("#formFields input, #formFields select")).map(e => e.value),
-    test: Array.from(document.querySelectorAll("#testTable input, #testTable select")).map(e => e.value),
-    footer: Array.from(document.querySelectorAll(".footer input, .footer select")).map(e => e.value)
+    fields: Array.from(document.querySelectorAll("#formFields input, #formFields select"))
+      .map(e => e.value),
+    test: Array.from(document.querySelectorAll("#testTable input, #testTable select"))
+      .map(e => e.value),
+    footer: Array.from(document.querySelectorAll(".footer input, .footer select"))
+      .map(e => e.value)
   };
 
   const originalTag = document.getElementById("currentEditTag").value.trim();
   const idx = records.findIndex(r => r.tag === originalTag || r.tag === tag);
+
   if (idx >= 0) {
     records[idx] = formData;
   } else {
     records.push(formData);
   }
 
-  // ✅ Save to localStorage
   localStorage.setItem("psvRecords", JSON.stringify(records));
 
-  alert("Saved!");
+  alert("✅ Record Saved!");
+  clearForm();
   showCard("viewCard");
 }
 
+// ✅ Update Records Table
 function updateRecordList() {
   const tbody = document.querySelector("#recordList tbody");
   tbody.innerHTML = "";
@@ -69,9 +100,9 @@ function updateRecordList() {
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${r.tag}</td>
-      <td>${r.fields[16]}</td>
-      <td>${r.fields[0]}</td>
-      <td>${r.footer[0]}</td>
+      <td>${r.fields[16] || ""}</td>
+      <td>${r.fields[0] || ""}</td>
+      <td>${r.footer[0] || ""}</td>
       <td>
         <button onclick="loadRecord('${r.tag}')">👁 View</button>
         <button onclick="deleteRecord('${r.tag}')">🗑 Delete</button>
@@ -81,6 +112,7 @@ function updateRecordList() {
   });
 }
 
+// ✅ Load a record into form
 function loadRecord(tag) {
   const record = records.find(r => r.tag === tag);
   if (!record) return;
@@ -99,10 +131,12 @@ function loadRecord(tag) {
 
   document.getElementById("tagInput").value = record.tag;
   document.getElementById("currentEditTag").value = record.tag;
+
   setFormEditable(false);
   document.getElementById("editBtn").style.display = "inline-block";
 }
 
+// ✅ Delete a record
 function deleteRecord(tag) {
   if (confirm(`Delete record for ${tag}?`)) {
     records = records.filter(r => r.tag !== tag);
@@ -110,3 +144,10 @@ function deleteRecord(tag) {
     updateRecordList();
   }
 }
+
+// ✅ Make functions accessible for inline onclick()
+window.showCard = showCard;
+window.saveData = saveData;
+window.enableEditing = enableEditing;
+window.loadRecord = loadRecord;
+window.deleteRecord = deleteRecord;
