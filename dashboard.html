@@ -38,18 +38,30 @@
       padding: 10px;
       overflow: auto;
       background: #fff;
+      position: relative;
     }
     #svgObject {
       width: 100%;
       height: 95vh;
       border: 1px solid #ccc;
     }
-    /* ✅ Strong Visible Highlight */
-    .highlight {
-      fill: red !important;
-      stroke: black !important;
-      stroke-width: 4px !important;
-      font-weight: bold !important;
+
+    /* ✅ Blinking + Glow */
+    .blink-glow {
+      animation: blink 1s infinite alternate;
+      filter: drop-shadow(0 0 5px yellow) drop-shadow(0 0 10px red);
+    }
+    @keyframes blink {
+      from {
+        fill: red;
+        stroke: yellow;
+        stroke-width: 3px;
+      }
+      to {
+        fill: yellow;
+        stroke: red;
+        stroke-width: 4px;
+      }
     }
   </style>
 </head>
@@ -86,33 +98,46 @@ document.addEventListener("DOMContentLoaded", () => {
         console.clear();
         console.log("Selected DM:", selectedDM);
 
-        // Remove old highlights (reset style)
+        // ✅ Remove previous effects
         svgDoc.querySelectorAll("text, tspan").forEach(txt => {
-          txt.style.fill = "";
-          txt.style.stroke = "";
-          txt.style.strokeWidth = "";
-          txt.style.fontWeight = "";
+          txt.classList.remove("blink-glow");
+          txt.style.transform = "";
         });
 
-        // Highlight with strong visible color
         let count = 0;
+        let firstElement = null;
+
+        // ✅ Highlight + Glow
         svgDoc.querySelectorAll("text, tspan").forEach(txt => {
           const cleanText = txt.textContent.replace(/\s+/g, '').trim();
           if (cleanText === selectedDM) {
-            txt.style.fill = "red";
-            txt.style.stroke = "yellow";
-            txt.style.strokeWidth = "3px";
-            txt.style.fontWeight = "bold";
+            txt.classList.add("blink-glow");
+            if (!firstElement) firstElement = txt;
             count++;
           }
         });
 
         console.log("Matched Elements:", count);
+
+        // ✅ Auto-Zoom (scroll into view)
+        if (firstElement) {
+          const bbox = firstElement.getBBox();
+          const svgRoot = svgDoc.querySelector("svg");
+
+          const zoomLevel = 2; // 2x zoom
+          const centerX = bbox.x + bbox.width / 2;
+          const centerY = bbox.y + bbox.height / 2;
+
+          svgRoot.setAttribute("viewBox", 
+            `${centerX - (svgRoot.clientWidth / (2 * zoomLevel))} 
+             ${centerY - (svgRoot.clientHeight / (2 * zoomLevel))} 
+             ${svgRoot.clientWidth / zoomLevel} 
+             ${svgRoot.clientHeight / zoomLevel}`);
+        }
       });
     });
   });
 });
 </script>
-
 </body>
 </html>
