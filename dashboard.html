@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Damage Mechanism Highlight</title>
+  <title>Damage Mechanism Highlight + Manual Zoom</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -38,12 +38,12 @@
     }
     .drawing {
       flex: 1;
-      padding: 10px;
+      padding: 0;
       overflow: hidden;
       background: #fff;
       position: relative;
     }
-    #svgObject {
+    #svgContainer {
       width: 100%;
       height: 95vh;
       border: 1px solid #ccc;
@@ -66,47 +66,51 @@
   </div>
 
   <div class="drawing">
-    <object id="svgObject" data="HCU-Model-Final.svg" type="image/svg+xml"></object>
+    <div id="svgContainer"></div>
   </div>
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", () => {
-  const dmListItems = document.querySelectorAll("#dm-list li");
-  const svgObject = document.getElementById("svgObject");
-  let blinkIntervals = [];
+// ✅ Load SVG Inline
+fetch("HCU-Model-Final.svg")
+  .then(res => res.text())
+  .then(data => {
+    document.getElementById("svgContainer").innerHTML = data;
 
-  svgObject.addEventListener("load", () => {
-    const svgDoc = svgObject.contentDocument;
-    const svgRoot = svgDoc.querySelector("svg");
+    const svgRoot = document.querySelector("#svgContainer svg");
+    const dmListItems = document.querySelectorAll("#dm-list li");
+    let blinkIntervals = [];
 
-    // ✅ Highlight + Glow Logic
+    // ✅ Set Initial ViewBox if missing
+    if (!svgRoot.getAttribute("viewBox")) {
+      const vb = svgRoot.getBBox();
+      svgRoot.setAttribute("viewBox", `${vb.x} ${vb.y} ${vb.width} ${vb.height}`);
+    }
+    const viewBox = svgRoot.viewBox.baseVal;
+
+    // ✅ Highlight + Blink + Glow
     dmListItems.forEach(item => {
       item.addEventListener("click", () => {
         const selectedDM = item.getAttribute("data-dm").trim();
         console.clear();
         console.log("Selected DM:", selectedDM);
 
-        // Clear old blinking
         blinkIntervals.forEach(interval => clearInterval(interval));
         blinkIntervals = [];
 
-        // Reset old styles
-        svgDoc.querySelectorAll("text, tspan").forEach(txt => {
+        svgRoot.querySelectorAll("text, tspan").forEach(txt => {
           txt.style.fill = "";
           txt.style.stroke = "";
           txt.style.strokeWidth = "";
           txt.style.filter = "";
         });
 
-        // Highlight + Blink + Glow
         let count = 0;
-        svgDoc.querySelectorAll("text, tspan").forEach(txt => {
+        svgRoot.querySelectorAll("text, tspan").forEach(txt => {
           const cleanText = txt.textContent.replace(/\s+/g, '').trim();
           if (cleanText === selectedDM) {
             count++;
             let visible = true;
-
             const interval = setInterval(() => {
               if (visible) {
                 txt.style.fill = "red";
@@ -123,7 +127,6 @@ document.addEventListener("DOMContentLoaded", () => {
               }
               visible = !visible;
             }, 500);
-
             blinkIntervals.push(interval);
           }
         });
@@ -133,44 +136,32 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // ✅ Manual Zoom & Pan
-    let viewBox = svgRoot.viewBox.baseVal;
-    if (!viewBox || viewBox.width === 0 || viewBox.height === 0) {
-      const vb = svgRoot.getBBox();
-      svgRoot.setAttribute("viewBox", `${vb.x} ${vb.y} ${vb.width} ${vb.height}`);
-      viewBox = svgRoot.viewBox.baseVal;
-    }
-
     let isPanning = false;
     let startX, startY;
 
-    svgObject.addEventListener("mousedown", (e) => {
+    svgRoot.addEventListener("mousedown", (e) => {
       isPanning = true;
       startX = e.clientX;
       startY = e.clientY;
-      svgObject.style.cursor = "grabbing";
+      svgRoot.style.cursor = "grabbing";
     });
 
-    svgObject.addEventListener("mouseup", () => {
+    window.addEventListener("mouseup", () => {
       isPanning = false;
-      svgObject.style.cursor = "grab";
+      svgRoot.style.cursor = "grab";
     });
 
-    svgObject.addEventListener("mouseleave", () => {
-      isPanning = false;
-      svgObject.style.cursor = "grab";
-    });
-
-    svgObject.addEventListener("mousemove", (e) => {
+    window.addEventListener("mousemove", (e) => {
       if (!isPanning) return;
-      const dx = (e.clientX - startX) * (viewBox.width / svgObject.clientWidth);
-      const dy = (e.clientY - startY) * (viewBox.height / svgObject.clientHeight);
+      const dx = (e.clientX - startX) * (viewBox.width / svgRoot.clientWidth);
+      const dy = (e.clientY - startY) * (viewBox.height / svgRoot.clientHeight);
       viewBox.x -= dx;
       viewBox.y -= dy;
       startX = e.clientX;
       startY = e.clientY;
     });
 
-    svgObject.addEventListener("wheel", (e) => {
+    svgRoot.addEventListener("wheel", (e) => {
       e.preventDefault();
       const zoomFactor = 1.1;
       const scale = e.deltaY < 0 ? 1 / zoomFactor : zoomFactor;
@@ -178,7 +169,6 @@ document.addEventListener("DOMContentLoaded", () => {
       viewBox.height *= scale;
     });
   });
-});
 </script>
 </body>
 </html>
