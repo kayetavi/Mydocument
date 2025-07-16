@@ -38,18 +38,16 @@
       padding: 10px;
       overflow: auto;
       background: #fff;
-      position: relative;
     }
     #svgObject {
       width: 100%;
       height: 95vh;
       border: 1px solid #ccc;
     }
-
     /* ✅ Blinking + Glow */
     .blink-glow {
       animation: blink 1s infinite alternate;
-      filter: drop-shadow(0 0 5px yellow) drop-shadow(0 0 10px red);
+      filter: drop-shadow(0 0 6px yellow) drop-shadow(0 0 12px red);
     }
     @keyframes blink {
       from {
@@ -98,35 +96,28 @@ document.addEventListener("DOMContentLoaded", () => {
         console.clear();
         console.log("Selected DM:", selectedDM);
 
-        // ✅ Remove old effects
+        // ✅ Remove previous highlights
         svgDoc.querySelectorAll("text, tspan").forEach(txt => {
           txt.classList.remove("blink-glow");
+          txt.style.fill = "";
+          txt.style.stroke = "";
         });
 
-        let firstElement = null;
+        // ✅ Highlight + Glow
         let count = 0;
-
-        // ✅ Highlight & Glow
         svgDoc.querySelectorAll("text, tspan").forEach(txt => {
           const cleanText = txt.textContent.replace(/\s+/g, '').trim();
           if (cleanText === selectedDM) {
             txt.classList.add("blink-glow");
-            if (!firstElement) firstElement = txt;
             count++;
           }
         });
 
         console.log("Matched Elements:", count);
-
-        // ✅ Smooth Scroll (No ViewBox Change)
-        if (firstElement) {
-          const bbox = firstElement.getBoundingClientRect();
-          const svgBox = svgObject.getBoundingClientRect();
-          const scrollTop = window.scrollY + bbox.top - svgBox.top - 200;
-          window.scrollTo({ top: scrollTop, behavior: "smooth" });
-        }
       });
     });
   });
 });
 </script>
+</body>
+</html>
