@@ -1,19 +1,54 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Damage Mechanism Highlight</title>
   <style>
-    body { font-family: Arial; margin: 0; display: flex; }
-    .container { display: flex; width: 100%; }
-    .sidebar { width: 220px; background: #f4f4f4; padding: 10px; border-right: 1px solid #ccc; }
-    .sidebar ul { list-style: none; padding: 0; margin: 0; }
-    .sidebar li { padding: 5px; cursor: pointer; border-radius: 4px; transition: background 0.3s ease; }
-    .sidebar li:hover { background: #ddd; }
-    .drawing { flex: 1; padding: 10px; overflow: auto; background: #fff; }
-    #svgObject { width: 100%; height: 95vh; border: 1px solid #ccc; }
-    .highlight { fill: yellow !important; stroke: red !important; stroke-width: 2px !important; }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      display: flex;
+    }
+    .container {
+      display: flex;
+      width: 100%;
+    }
+    .sidebar {
+      width: 220px;
+      background: #f4f4f4;
+      padding: 10px;
+      border-right: 1px solid #ccc;
+    }
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .sidebar li {
+      padding: 5px;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background 0.3s ease;
+    }
+    .sidebar li:hover {
+      background: #ddd;
+    }
+    .drawing {
+      flex: 1;
+      padding: 10px;
+      overflow: auto;
+      background: #fff;
+    }
+    #svgObject {
+      width: 100%;
+      height: 95vh;
+      border: 1px solid #ccc;
+    }
+    .highlight {
+      fill: yellow !important;
+      stroke: red !important;
+      stroke-width: 2px !important;
+    }
   </style>
 </head>
 <body>
@@ -23,35 +58,36 @@
     <ul id="dm-list">
       <li data-dm="1">1 - Sulfidation</li>
       <li data-dm="4">4 - Creep and Stress Rupture</li>
-      <li data-dm="5">5 - High Temp H2/H2S Corrosion</li>
-      <li data-dm="7">7 - Naphthenic Acid Corrosion</li>
-      <li data-dm="8">8 - Ammonium Bisulfide Corrosion</li>
-      <li data-dm="9">9 - Ammonium Chloride Corrosion</li>
-      <li data-dm="20">20 - Erosion / Corrosion</li>
       <li data-dm="23">23 - Amine SCC</li>
-      <li data-dm="25">25 - Amine Corrosion</li>
-      <li data-dm="30">30 - Brittle Fracture</li>
-      <li data-dm="31">31 - CUI</li>
-      <li data-dm="32">32 - HIC / SOHIC</li>
-      <li data-dm="35">35 - Hydrogen Embrittlement</li>
-      <li data-dm="45">45 - Short-term Overheating</li>
+      <li data-dm="45">45 - Brittle Fracture</li>
       <li data-dm="46">46 - Stress Relaxation Cracking</li>
     </ul>
   </div>
+
   <div class="drawing">
+    <!-- ✅ Replace with your final SVG file name -->
     <object id="svgObject" data="HCU-Model-Final.svg" type="image/svg+xml"></object>
   </div>
 </div>
+
 <script>
 document.addEventListener("DOMContentLoaded", () => {
   const dmListItems = document.querySelectorAll("#dm-list li");
   const svgObject = document.getElementById("svgObject");
+
   svgObject.addEventListener("load", () => {
     const svgDoc = svgObject.contentDocument;
+
     dmListItems.forEach(item => {
       item.addEventListener("click", () => {
         const selectedDM = item.getAttribute("data-dm");
-        svgDoc.querySelectorAll(".highlight").forEach(el => el.classList.remove("highlight"));
+
+        // Remove previous highlights
+        svgDoc.querySelectorAll(".highlight").forEach(el => {
+          el.classList.remove("highlight");
+        });
+
+        // Highlight all matching text numbers
         svgDoc.querySelectorAll("text").forEach(txt => {
           if (txt.textContent.trim() === selectedDM) {
             txt.classList.add("highlight");
