@@ -91,6 +91,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   svgObject.addEventListener("load", () => {
     const svgDoc = svgObject.contentDocument;
+    const svgRoot = svgDoc.querySelector("svg");
+    const originalViewBox = svgRoot.getAttribute("viewBox"); // Store original viewBox
 
     dmListItems.forEach(item => {
       item.addEventListener("click", () => {
@@ -119,25 +121,32 @@ document.addEventListener("DOMContentLoaded", () => {
 
         console.log("Matched Elements:", count);
 
-        // ✅ Auto-Zoom (scroll into view)
+        // ✅ Auto-Zoom (Safe)
         if (firstElement) {
-          const bbox = firstElement.getBBox();
-          const svgRoot = svgDoc.querySelector("svg");
+          try {
+            const bbox = firstElement.getBBox();
+            const zoomLevel = 2; // 2x zoom
 
-          const zoomLevel = 2; // 2x zoom
-          const centerX = bbox.x + bbox.width / 2;
-          const centerY = bbox.y + bbox.height / 2;
+            const centerX = bbox.x + bbox.width / 2;
+            const centerY = bbox.y + bbox.height / 2;
 
-          svgRoot.setAttribute("viewBox", 
-            `${centerX - (svgRoot.clientWidth / (2 * zoomLevel))} 
-             ${centerY - (svgRoot.clientHeight / (2 * zoomLevel))} 
-             ${svgRoot.clientWidth / zoomLevel} 
-             ${svgRoot.clientHeight / zoomLevel}`);
+            const viewWidth = svgRoot.viewBox.baseVal.width / zoomLevel;
+            const viewHeight = svgRoot.viewBox.baseVal.height / zoomLevel;
+
+            svgRoot.setAttribute(
+              "viewBox",
+              `${centerX - viewWidth / 2} ${centerY - viewHeight / 2} ${viewWidth} ${viewHeight}`
+            );
+          } catch (e) {
+            console.error("Zoom failed, resetting to original viewBox", e);
+            svgRoot.setAttribute("viewBox", originalViewBox);
+          }
+        } else {
+          // Reset to original if no match
+          svgRoot.setAttribute("viewBox", originalViewBox);
         }
       });
     });
   });
 });
 </script>
-</body>
-</html>
