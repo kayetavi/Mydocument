@@ -1,117 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Safety Valve Calibration Report</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <title>Damage Mechanism Highlight - SVG</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<div class="container">
 
-<div class="btn-row">
-  <button onclick="showCard('entryCard')">➕ Add New Entry</button>
-  <button onclick="showCard('viewCard')">📄 View Records</button>
-</div>
-
-<!-- Entry Card -->
-<div id="entryCard" class="card visible">
-  <div class="container">
-    <h2>NUMALIGARH REFINERY LIMITED</h2>
-    <h3>SAFETY VALVE CALIBRATION REPORT</h3>
-
-    <div class="form-grid" id="formFields">
-      <div class="form-group"><label>Date:</label><input type="date" id="dateInput" /></div>
-      <div class="form-group"><label>Time:</label><input type="time" /></div>
-      <div class="form-group"><label>Unit:</label><input type="text" /></div>
-      <div class="form-group"><label>Tag No:</label><input type="text" id="tagInput" /></div>
-      <input type="hidden" id="currentEditTag" />
-      <div class="form-group"><label>Type:</label>
-        <select>
-          <option>Conventional</option>
-          <option>Balanced Bellow</option>
-          <option>Open Bonnet</option>
-        </select>
-      </div>
-      <div class="form-group"><label>Manufacturer:</label><input type="text" /></div>
-      <div class="form-group"><label>Service:</label><input type="text" /></div>
-      <div class="form-group"><label>Work Order No:</label><input type="text" /></div>
-      <div class="form-group"><label>Work Order Date:</label><input type="date" /></div>
-      <div class="form-group"><label>Changes in Set Pressure:</label><input type="text" /></div>
-      <div class="form-group"><label>Authorization Ref No & Date:</label><input type="text" /></div>
-      <div class="form-group"><label>Cold Differential Test Pressure:</label><input type="text" /></div>
-      <div class="form-group"><label>Back Pressure:</label><input type="text" /></div>
-      <div class="form-group"><label>Set Pressure:</label><input type="text" /></div>
-      <div class="form-group"><label>Orifice Size:</label><input type="text" /></div>
-      <div class="form-group"><label>Testing Medium:</label><input type="text" /></div>
-      <div class="form-group"><label>Reason for Calibration:</label><input type="text" id="reasonInput" /></div>
-      <div class="form-group"><label>Repairs & Replacements:</label><input type="text" /></div>
-    </div>
-
-    <table id="testTable">
-      <thead>
-        <tr>
-          <th>Relieving Pressure</th>
-          <th>Set Pressure</th>
-          <th>Holding Time</th>
-          <th>Max Bubbles</th>
-          <th>Observed Bubbles</th>
-          <th>Status</th>
-          <th>Remarks</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td><input type="text" /></td>
-          <td><input type="text" /></td>
-          <td><input type="text" /></td>
-          <td><input type="text" /></td>
-          <td><input type="text" /></td>
-          <td><select><option>Accepted</option><option>Rejected</option></select></td>
-          <td><input type="text" /></td>
-        </tr>
-      </tbody>
-    </table>
-
-    <div class="form-group"><label>Weather sealed after calibration:</label>
-      <select><option>Yes</option><option>No</option></select>
-    </div>
-
-    <div class="footer">
-      <div>
-        <label>Witnessed by:</label><br><input type="text" id="witnessInput" /><br>
-        <label>Signature:</label><br><input type="text" />
-      </div>
-      <div>
-        <label>Next Due Date:</label><br><input type="date" />
-      </div>
-    </div>
-
-    <div class="note">Doc. No.: NRL/REC/09-02 | Rev: 01 | Page: 1 of 1</div>
-
-    <div class="btn-row">
-      <button id="editBtn" onclick="enableEditing()" style="display:none;">✏️ Edit</button>
-      <button onclick="saveData()">💾 Save Entry</button>
-    </div>
+  <!-- ✅ Right Side List -->
+  <div class="sidebar">
+    <h3>Damage Mechanisms</h3>
+    <ul id="dm-list">
+      <li data-dm="1">1 - Sulfidation</li>
+      <li data-dm="4">4 - Creep and Stress Rupture</li>
+      <li data-dm="23">23 - Amine SCC</li>
+      <li data-dm="45">45 - Brittle Fracture</li>
+      <li data-dm="46">46 - Stress Relaxation Cracking</li>
+    </ul>
   </div>
+
+  <!-- ✅ Drawing Section -->
+  <div class="drawing" id="drawing">
+    <!-- ✅ Embed SVG directly -->
+    <object id="svgObject" data="7bea5eac-d50e-480a-8690-03362a0530b5.svg" type="image/svg+xml"></object>
+  </div>
+
 </div>
 
-<!-- View Card -->
-<div id="viewCard" class="card">
-  <h2>📋 PSV Records</h2>
-  <table class="record-table" id="recordList">
-    <thead>
-      <tr>
-        <th>Tag No</th>
-        <th>Reason</th>
-        <th>Date</th>
-        <th>Witnessed By</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-</div>
-
-<script src="dashboard.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
