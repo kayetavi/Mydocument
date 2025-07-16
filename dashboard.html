@@ -44,6 +44,7 @@
       height: 95vh;
       border: 1px solid #ccc;
     }
+    /* ✅ Highlight Effect */
     .highlight {
       fill: yellow !important;
       stroke: red !important;
@@ -58,7 +59,6 @@
     <ul id="dm-list">
       <li data-dm="1">1 - Sulfidation</li>
       <li data-dm="4">4 - Creep and Stress Rupture</li>
-      <li data-dm="5">5 - High Temp H2/H2S Corrosion</li>
       <li data-dm="7">7 - Naphthenic Acid Corrosion</li>
       <li data-dm="8">8 - Ammonium Bisulfide Corrosion</li>
       <li data-dm="9">9 - Ammonium Chloride Corrosion</li>
@@ -75,7 +75,7 @@
   </div>
 
   <div class="drawing">
-    <!-- ✅ Make sure this file exists in same folder -->
+    <!-- ✅ Keep your SVG file (same folder) -->
     <object id="svgObject" data="HCU-Model-Final.svg" type="image/svg+xml"></object>
   </div>
 </div>
@@ -97,10 +97,10 @@ document.addEventListener("DOMContentLoaded", () => {
           el.classList.remove("highlight");
         });
 
-        // ✅ Highlight all matching text numbers (ignores spaces & extra chars)
-        svgDoc.querySelectorAll("text").forEach(txt => {
+        // ✅ Highlight matching <text> and <tspan>
+        svgDoc.querySelectorAll("text, tspan").forEach(txt => {
           const cleanText = txt.textContent.replace(/\s+/g, '').trim();
-          if (cleanText.includes(selectedDM)) {
+          if (cleanText === selectedDM) {
             txt.classList.add("highlight");
           }
         });
