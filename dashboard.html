@@ -58,14 +58,24 @@
     <ul id="dm-list">
       <li data-dm="1">1 - Sulfidation</li>
       <li data-dm="4">4 - Creep and Stress Rupture</li>
+      <li data-dm="5">5 - High Temp H2/H2S Corrosion</li>
+      <li data-dm="7">7 - Naphthenic Acid Corrosion</li>
+      <li data-dm="8">8 - Ammonium Bisulfide Corrosion</li>
+      <li data-dm="9">9 - Ammonium Chloride Corrosion</li>
+      <li data-dm="20">20 - Erosion / Corrosion</li>
       <li data-dm="23">23 - Amine SCC</li>
-      <li data-dm="45">45 - Brittle Fracture</li>
+      <li data-dm="25">25 - Amine Corrosion</li>
+      <li data-dm="30">30 - Brittle Fracture</li>
+      <li data-dm="31">31 - CUI</li>
+      <li data-dm="32">32 - HIC / SOHIC</li>
+      <li data-dm="35">35 - Hydrogen Embrittlement</li>
+      <li data-dm="45">45 - Short-term Overheating</li>
       <li data-dm="46">46 - Stress Relaxation Cracking</li>
     </ul>
   </div>
 
   <div class="drawing">
-    <!-- ✅ Replace with your final SVG file name -->
+    <!-- ✅ Make sure this file exists in same folder -->
     <object id="svgObject" data="HCU-Model-Final.svg" type="image/svg+xml"></object>
   </div>
 </div>
@@ -80,16 +90,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
     dmListItems.forEach(item => {
       item.addEventListener("click", () => {
-        const selectedDM = item.getAttribute("data-dm");
+        const selectedDM = item.getAttribute("data-dm").trim();
 
-        // Remove previous highlights
+        // ✅ Remove previous highlights
         svgDoc.querySelectorAll(".highlight").forEach(el => {
           el.classList.remove("highlight");
         });
 
-        // Highlight all matching text numbers
+        // ✅ Highlight all matching text numbers (ignores spaces & extra chars)
         svgDoc.querySelectorAll("text").forEach(txt => {
-          if (txt.textContent.trim() === selectedDM) {
+          const cleanText = txt.textContent.replace(/\s+/g, '').trim();
+          if (cleanText.includes(selectedDM)) {
             txt.classList.add("highlight");
           }
         });
