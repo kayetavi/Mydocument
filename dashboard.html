@@ -86,16 +86,23 @@ document.addEventListener("DOMContentLoaded", () => {
         console.clear();
         console.log("Selected DM:", selectedDM);
 
-        // Remove previous highlights
-        svgDoc.querySelectorAll(".highlight").forEach(el => {
-          el.classList.remove("highlight");
+        // Remove old highlights (reset style)
+        svgDoc.querySelectorAll("text, tspan").forEach(txt => {
+          txt.style.fill = "";
+          txt.style.stroke = "";
+          txt.style.strokeWidth = "";
+          txt.style.fontWeight = "";
         });
 
+        // Highlight with strong visible color
         let count = 0;
         svgDoc.querySelectorAll("text, tspan").forEach(txt => {
           const cleanText = txt.textContent.replace(/\s+/g, '').trim();
           if (cleanText === selectedDM) {
-            txt.classList.add("highlight");
+            txt.style.fill = "red";
+            txt.style.stroke = "yellow";
+            txt.style.strokeWidth = "3px";
+            txt.style.fontWeight = "bold";
             count++;
           }
         });
@@ -106,5 +113,6 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 </script>
+
 </body>
 </html>
