@@ -89,9 +89,10 @@ document.addEventListener("DOMContentLoaded", () => {
           txt.style.fill = "";
           txt.style.stroke = "";
           txt.style.strokeWidth = "";
+          txt.style.filter = "";
         });
 
-        // ✅ Highlight + Manual Blink
+        // ✅ Highlight + Strong Glow + Blink
         let count = 0;
         svgDoc.querySelectorAll("text, tspan").forEach(txt => {
           const cleanText = txt.textContent.replace(/\s+/g, '').trim();
@@ -102,12 +103,16 @@ document.addEventListener("DOMContentLoaded", () => {
             const interval = setInterval(() => {
               if (visible) {
                 txt.style.fill = "red";
-                txt.style.stroke = "yellow";
+                txt.style.stroke = "#00ffff"; // Cyan outline
                 txt.style.strokeWidth = "3px";
+                txt.style.filter =
+                  "drop-shadow(0 0 6px #00ffff) drop-shadow(0 0 12px red)";
               } else {
-                txt.style.fill = "yellow";
+                txt.style.fill = "#00ffff"; // Cyan fill
                 txt.style.stroke = "red";
                 txt.style.strokeWidth = "3px";
+                txt.style.filter =
+                  "drop-shadow(0 0 6px red) drop-shadow(0 0 12px #00ffff)";
               }
               visible = !visible;
             }, 500);
@@ -122,5 +127,6 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 </script>
+
 </body>
 </html>
