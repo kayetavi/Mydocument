@@ -1,6 +1,6 @@
 let selectedDMCode = null;
 
-// Load SVG and setup interactions
+// Load the SVG and bind interaction logic
 fetch("HCU-Model-Final.svg")
   .then(res => res.text())
   .then(data => {
@@ -24,7 +24,7 @@ fetch("HCU-Model-Final.svg")
 
         document.getElementById("showDetailsMsg").style.display = "inline-block";
 
-        // Stop previous blinking
+        // Clear old blinking
         blinkIntervals.forEach(interval => clearInterval(interval));
         blinkIntervals = [];
 
@@ -35,17 +35,24 @@ fetch("HCU-Model-Final.svg")
           txt.style.filter = "";
         });
 
+        let count = 0;
         svgRoot.querySelectorAll("text, tspan").forEach(txt => {
           const cleanText = txt.textContent.replace(/\s+/g, '').trim();
           if (cleanText === dmCode) {
+            count++;
             let visible = true;
             const interval = setInterval(() => {
-              txt.style.fill = visible ? "red" : "#00ffff";
-              txt.style.stroke = visible ? "#00ffff" : "red";
-              txt.style.strokeWidth = "3px";
-              txt.style.filter = visible
-                ? "drop-shadow(0 0 6px #00ffff) drop-shadow(0 0 12px red)"
-                : "drop-shadow(0 0 6px red) drop-shadow(0 0 12px #00ffff)";
+              if (visible) {
+                txt.style.fill = "red";
+                txt.style.stroke = "#00ffff";
+                txt.style.strokeWidth = "3px";
+                txt.style.filter = "drop-shadow(0 0 6px #00ffff) drop-shadow(0 0 12px red)";
+              } else {
+                txt.style.fill = "#00ffff";
+                txt.style.stroke = "red";
+                txt.style.strokeWidth = "3px";
+                txt.style.filter = "drop-shadow(0 0 6px red) drop-shadow(0 0 12px #00ffff)";
+              }
               visible = !visible;
             }, 500);
             blinkIntervals.push(interval);
@@ -54,7 +61,7 @@ fetch("HCU-Model-Final.svg")
       });
     });
 
-    // Pan and zoom
+    // Zoom and pan logic
     let isPanning = false;
     let startX, startY;
 
@@ -89,6 +96,7 @@ fetch("HCU-Model-Final.svg")
     });
   });
 
+// Modal controls
 function openModal() {
   if (!selectedDMCode || !damageMechanisms[selectedDMCode]) {
     alert("No details found.");
@@ -98,12 +106,10 @@ function openModal() {
 }
 
 function closeModal() {
-  const modalOverlay = document.getElementById("popupOverlay");
-  if (modalOverlay) {
-    modalOverlay.remove();
-  }
+  document.getElementById("popupModal").style.display = "none";
 }
 
+// Popup Tabs UI
 const createTabs = (dmData) => {
   const tabTitles = [
     "description", "affectedUnits", "mitigation",
@@ -119,10 +125,6 @@ const createTabs = (dmData) => {
   tabHeader.style.margin = "0";
   tabHeader.style.padding = "0";
   tabHeader.style.borderBottom = "1px solid #ccc";
-  tabHeader.style.position = "sticky";
-  tabHeader.style.top = "0";
-  tabHeader.style.background = "#fff";
-  tabHeader.style.zIndex = "10";
 
   const tabContent = document.createElement("div");
   tabContent.style.padding = "10px";
@@ -159,56 +161,28 @@ const showPopup = (dmId) => {
     return;
   }
 
-  // Remove any existing popup
-  const existing = document.getElementById("popupOverlay");
-  if (existing) existing.remove();
+  const popup = document.createElement("div");
+  popup.style.position = "fixed";
+  popup.style.top = "50%";
+  popup.style.left = "50%";
+  popup.style.transform = "translate(-50%, -50%)";
+  popup.style.background = "#fff";
+  popup.style.border = "2px solid #444";
+  popup.style.boxShadow = "0 0 10px rgba(0,0,0,0.4)";
+  popup.style.zIndex = "1000";
+  popup.style.maxWidth = "800px";
+  popup.style.maxHeight = "90vh";
+  popup.style.overflowY = "auto";
+  popup.style.padding = "15px";
+  popup.style.borderRadius = "8px";
 
-  // Overlay
-  const overlay = document.createElement("div");
-  overlay.id = "popupOverlay";
-  overlay.style.position = "fixed";
-  overlay.style.top = "0";
-  overlay.style.left = "0";
-  overlay.style.width = "100vw";
-  overlay.style.height = "100vh";
-  overlay.style.background = "rgba(0, 0, 0, 0.5)";
-  overlay.style.backdropFilter = "blur(6px)";
-  overlay.style.display = "flex";
-  overlay.style.justifyContent = "center";
-  overlay.style.alignItems = "center";
-  overlay.style.zIndex = "1000";
+  const closeBtn = document.createElement("button");
+  closeBtn.textContent = "Close";
+  closeBtn.style.marginBottom = "10px";
+  closeBtn.onclick = () => popup.remove();
 
-  // Modal
-  const modal = document.createElement("div");
-  modal.style.background = "#fff";
-  modal.style.width = "60%";
-  modal.style.maxHeight = "80vh";
-  modal.style.overflowY = "auto";
-  modal.style.padding = "20px";
-  modal.style.borderRadius = "8px";
-  modal.style.position = "relative";
-  modal.style.boxShadow = "0 0 15px rgba(0,0,0,0.4)";
+  popup.appendChild(closeBtn);
+  popup.appendChild(createTabs(dmData));
 
-  // Close Button
-  const closeBtn = document.createElement("span");
-  closeBtn.innerHTML = "&times;";
-  closeBtn.style.position = "absolute";
-  closeBtn.style.top = "10px";
-  closeBtn.style.right = "15px";
-  closeBtn.style.fontSize = "24px";
-  closeBtn.style.cursor = "pointer";
-  closeBtn.title = "Close";
-  closeBtn.onclick = closeModal;
-
-  modal.appendChild(closeBtn);
-  modal.appendChild(createTabs(dmData));
-
-  overlay.appendChild(modal);
-
-  // Close on click outside
-  overlay.addEventListener("click", (e) => {
-    if (e.target === overlay) closeModal();
-  });
-
-  document.body.appendChild(overlay);
+  document.body.appendChild(popup);
 };
