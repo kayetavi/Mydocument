@@ -1,19 +1,15 @@
-export const damageMechanismData = {
-  cui: {
-    title: "Corrosion Under Insulation (CUI)",
-    description: "CUI occurs when water becomes trapped under insulation. Common in carbon steel at 60–120°C."
-  },
-  sulfidation: {
+const DamageMechanism = {
+  "1": {
     title: "Sulfidation",
-    description: "Sulfidation is a high-temperature corrosion due to sulfur compounds reacting with metal surfaces."
+    description: "Occurs due to high temperature sulfur compounds attacking metal surfaces."
   },
-  oxidation: {
-    title: "Oxidation",
-    description: "Oxidation is the reaction of metal with oxygen at elevated temperatures."
+  "2": {
+    title: "Wet H2S Damage",
+    description: "Causes blistering, HIC, SOHIC or SSC in presence of H2S and water."
   },
-  acidSourWater: {
-    title: "Acid Sour Water Corrosion",
-    description: "Occurs in environments containing H₂S and water at low pH. Common in refineries."
-  }
-  // Add more as needed
+  "3": {
+    title: "Creep and Stress Rupture",
+    description: "Time-dependent high-temperature failure mechanism."
+  },
+  // Add other keys like "4", "5", ... as needed
 };
