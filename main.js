@@ -185,30 +185,55 @@ const showPopup = (dmId) => {
     return;
   }
 
+  // Remove any existing popup
+  const existingPopup = document.getElementById("customPopup");
+  if (existingPopup) existingPopup.remove();
+
   const popup = document.createElement("div");
+  popup.id = "customPopup";
   popup.style.position = "fixed";
-  popup.style.top = "0";
-  popup.style.left = "0";
-  popup.style.width = "100vw";
-  popup.style.height = "100vh";
+  popup.style.top = "50px";
+  popup.style.left = "50%";
+  popup.style.transform = "translateX(-50%)";
   popup.style.background = "#fff";
+  popup.style.border = "2px solid #444";
+  popup.style.boxShadow = "0 0 12px rgba(0,0,0,0.5)";
   popup.style.zIndex = "1000";
+  popup.style.width = "800px";
+  popup.style.maxWidth = "95vw";
+  popup.style.maxHeight = "80vh";
   popup.style.overflowY = "auto";
   popup.style.padding = "20px";
+  popup.style.borderRadius = "10px";
+  popup.style.boxSizing = "border-box";
 
-  const closeBtn = document.createElement("button");
-  closeBtn.textContent = "Close";
-  closeBtn.style.marginBottom = "10px";
-  closeBtn.style.padding = "8px 16px";
-  closeBtn.style.border = "none";
-  closeBtn.style.borderRadius = "4px";
-  closeBtn.style.background = "#333";
-  closeBtn.style.color = "#fff";
+  // Close button
+  const closeBtn = document.createElement("span");
+  closeBtn.textContent = "✖";
+  closeBtn.style.position = "absolute";
+  closeBtn.style.top = "10px";
+  closeBtn.style.right = "15px";
   closeBtn.style.cursor = "pointer";
+  closeBtn.style.fontSize = "20px";
+  closeBtn.style.color = "#333";
+  closeBtn.title = "Close";
   closeBtn.onclick = () => popup.remove();
 
+  // Content
+  const title = document.createElement("h2");
+  title.textContent = dmData.name;
+
+  const description = document.createElement("div");
+  description.innerHTML = `
+    <h3>Description</h3>${dmData.description}
+    <h3>Affected Units</h3>${dmData.affectedUnits}
+    <h3>Mitigation</h3>${dmData.mitigation}
+    <h3>Inspection</h3>${dmData.inspection}
+  `;
+
   popup.appendChild(closeBtn);
-  popup.appendChild(createTabs(dmData));
+  popup.appendChild(title);
+  popup.appendChild(description);
 
   document.body.appendChild(popup);
 };
