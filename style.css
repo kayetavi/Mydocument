@@ -225,6 +225,62 @@ body {
   cursor: grab;
 }
 
+/* ✅ Flow diagram css */
+
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  display: flex;
+}
+
+.container {
+  display: flex;
+  width: 100%;
+}
+
+.sidebar {
+  width: 220px;
+  background: #f4f4f4;
+  padding: 10px;
+  border-right: 1px solid #ccc;
+}
+
+.sidebar h3 {
+  margin-top: 0;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar li {
+  padding: 5px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.3s ease;
+}
+
+.sidebar li:hover {
+  background: #ddd;
+}
+
+.drawing {
+  flex: 1;
+  padding: 0;
+  overflow: hidden;
+  background: #fff;
+  position: relative;
+}
+
+#svgContainer {
+  width: 100%;
+  height: 95vh;
+  border: 1px solid #ccc;
+  cursor: grab;
+}
+
 /* ✅ Show Details Blink */
 #showDetailsMsg {
   position: absolute;
@@ -247,7 +303,7 @@ body {
   }
 }
 
-/* ✅ Modal */
+/* ✅ Modal Styling */
 #popupModal {
   display: none;
   position: fixed;
@@ -256,26 +312,41 @@ body {
   top: 0;
   width: 100%;
   height: 100%;
+  overflow: auto;
   background-color: rgba(0, 0, 0, 0.5);
 }
 
 .modal-content {
   background: #fff;
-  padding: 20px;
-  margin: 10% auto;
-  width: 50%;
-  border-radius: 8px;
+  padding: 20px 30px;
+  margin: 5% auto;
+  width: 60%;
+  max-height: 80vh;
+  overflow-y: auto;
+  border-radius: 10px;
   position: relative;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.3);
 }
 
+/* ✅ Modal Title */
 .modal-content h2 {
   margin-top: 0;
+  font-size: 22px;
+  color: #333;
 }
 
+/* ✅ Close Button Top Right */
 .closeBtn {
   position: absolute;
   top: 10px;
   right: 15px;
-  font-size: 20px;
+  font-size: 24px;
+  color: #666;
   cursor: pointer;
+  font-weight: bold;
+  transition: color 0.3s ease;
 }
+
+.closeBtn:hover {
+  color: #000;
+  }
