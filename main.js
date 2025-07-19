@@ -170,24 +170,26 @@ const showPopup = (dmId) => {
 
   const popup = document.createElement("div");
   popup.style.position = "fixed";
-  popup.style.top = "50%";
-  popup.style.left = "50%";
-  popup.style.transform = "translate(-50%, -50%)";
+  popup.style.top = "0";
+  popup.style.left = "0";
+  popup.style.width = "100vw";
+  popup.style.height = "100vh";
   popup.style.background = "#fff";
-  popup.style.border = "2px solid #444";
-  popup.style.boxShadow = "0 0 10px rgba(0,0,0,0.4)";
   popup.style.zIndex = "1000";
-  popup.style.width = "700px";
-  popup.style.maxWidth = "90vw";
-  popup.style.minHeight = "450px";
-  popup.style.maxHeight = "90vh";
   popup.style.overflowY = "auto";
-  popup.style.padding = "15px";
-  popup.style.borderRadius = "8px";
+  popup.style.padding = "20px";
+  popup.style.border = "none";
+  popup.style.borderRadius = "0";
 
   const closeBtn = document.createElement("button");
   closeBtn.textContent = "Close";
   closeBtn.style.marginBottom = "10px";
+  closeBtn.style.padding = "8px 16px";
+  closeBtn.style.border = "none";
+  closeBtn.style.borderRadius = "4px";
+  closeBtn.style.background = "#333";
+  closeBtn.style.color = "#fff";
+  closeBtn.style.cursor = "pointer";
   closeBtn.onclick = () => popup.remove();
 
   popup.appendChild(closeBtn);
