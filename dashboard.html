@@ -2,61 +2,152 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Damage Mechanism Demo</title>
+  <title>Damage Mechanism Dashboard</title>
   <style>
-    .mechanism-item { cursor: pointer; padding: 6px; margin: 4px; background: #f0f0f0; }
-    .blink { animation: blink 1s infinite; }
-    @keyframes blink {
-      50% { background-color: yellow; }
+    body {
+      font-family: Arial;
+      margin: 0;
+      display: flex;
     }
-    #detailsBtn { display: none; margin-top: 10px; }
-    #popup {
+
+    .sidebar {
+      width: 250px;
+      background: #1f2937;
+      color: white;
+      padding: 20px;
+      height: 100vh;
+    }
+
+    .sidebar h2 {
+      margin-top: 0;
+    }
+
+    .damage-item {
+      padding: 10px;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    .damage-item:hover {
+      background-color: #374151;
+    }
+
+    .selected {
+      animation: blink 0.6s step-end infinite alternate;
+      background-color: #4b5563;
+    }
+
+    @keyframes blink {
+      from { border-left: 5px solid #facc15; }
+      to { border-left: 5px solid transparent; }
+    }
+
+    .content {
+      padding: 30px;
+      flex: 1;
+    }
+
+    .show-details-btn {
+      margin-top: 20px;
+      padding: 10px 15px;
+      font-size: 16px;
+      cursor: pointer;
+      background-color: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+
+    .modal {
       display: none;
-      position: fixed; top: 20%; left: 30%;
-      background: white; padding: 20px; border: 2px solid black; width: 40%;
+      position: fixed;
+      top: 20%;
+      left: 50%;
+      transform: translate(-50%, -20%);
+      background: white;
+      padding: 20px;
+      border: 2px solid #ccc;
+      z-index: 1000;
+      width: 400px;
+      border-radius: 8px;
+    }
+
+    .modal h3 {
+      margin-top: 0;
+    }
+
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 100%;
+      background: rgba(0,0,0,0.6);
+      z-index: 999;
     }
   </style>
 </head>
 <body>
-
-  <div id="mechanismList">
-    <div class="mechanism-item" data-dm="1">Sulfidation</div>
-    <div class="mechanism-item" data-dm="2">Wet H2S Damage</div>
-    <div class="mechanism-item" data-dm="3">Creep</div>
+  <div class="sidebar">
+    <h2>Damage Mechanisms</h2>
+    <div id="damageList">
+      <div class="damage-item" data-key="cui">CUI (Corrosion Under Insulation)</div>
+      <div class="damage-item" data-key="sulfidation">Sulfidation</div>
+      <div class="damage-item" data-key="oxidation">Oxidation</div>
+      <div class="damage-item" data-key="acidSourWater">Acid Sour Water</div>
+      <!-- Add more as needed -->
+    </div>
   </div>
 
-  <button id="detailsBtn">📘 Show Details</button>
+  <div class="content">
+    <h1>Welcome to Damage Mechanism Dashboard</h1>
+    <div id="messageArea"></div>
+  </div>
 
-  <div id="popup">
-    <h3 id="popupTitle"></h3>
-    <p id="popupDesc"></p>
-    <button onclick="document.getElementById('popup').style.display='none'">Close</button>
+  <div class="overlay" id="overlay"></div>
+  <div class="modal" id="detailModal">
+    <h3 id="detailTitle"></h3>
+    <p id="detailDescription"></p>
+    <button onclick="closeModal()">Close</button>
   </div>
 
   <script type="module">
-    import { damageMechanismDetails } from './Damagemechanism.js';
+    import { damageMechanismData } from './Damagemechanism.js';
 
-    const items = document.querySelectorAll(".mechanism-item");
-    const detailsBtn = document.getElementById("detailsBtn");
-    let selectedDM = null;
+    const damageItems = document.querySelectorAll('.damage-item');
+    const messageArea = document.getElementById('messageArea');
 
-    items.forEach(item => {
-      item.addEventListener("click", () => {
-        items.forEach(i => i.classList.remove("blink")); // Remove previous blinking
-        item.classList.add("blink"); // Start blinking
-        selectedDM = item.getAttribute("data-dm");
-        detailsBtn.style.display = "inline"; // Show "Show Details" button
+    let currentKey = null;
+
+    damageItems.forEach(item => {
+      item.addEventListener('click', () => {
+        damageItems.forEach(i => i.classList.remove('selected'));
+        item.classList.add('selected');
+        currentKey = item.getAttribute('data-key');
+
+        messageArea.innerHTML = `
+          <p><strong>Show Details</strong></p>
+          <button class="show-details-btn" onclick="showDetail()">Show Details</button>
+        `;
       });
     });
 
-    detailsBtn.addEventListener("click", () => {
-      if (selectedDM && damageMechanismDetails[selectedDM]) {
-        const data = damageMechanismDetails[selectedDM];
-        document.getElementById("popupTitle").innerText = data.title;
-        document.getElementById("popupDesc").innerText = data.description;
-        document.getElementById("popup").style.display = "block";
+    window.showDetail = function () {
+      if (!currentKey) return;
+      const data = damageMechanismData[currentKey];
+      if (data) {
+        document.getElementById('detailTitle').innerText = data.title;
+        document.getElementById('detailDescription').innerText = data.description;
+        document.getElementById('overlay').style.display = 'block';
+        document.getElementById('detailModal').style.display = 'block';
       }
-    });
+    };
+
+    window.closeModal = function () {
+      document.getElementById('overlay').style.display = 'none';
+      document.getElementById('detailModal').style.display = 'none';
+    };
   </script>
 </body>
 </html>
