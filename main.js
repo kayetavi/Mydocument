@@ -127,12 +127,24 @@ const createTabs = (dmData) => {
   tabHeader.style.borderBottom = "1px solid #ccc";
 
   const tabContent = document.createElement("div");
-  tabContent.style.padding = "10px";
+  tabContent.style.padding = "15px";
   tabContent.style.minHeight = "250px";
   tabContent.style.maxHeight = "400px";
   tabContent.style.overflowY = "auto";
   tabContent.style.border = "1px solid #ccc";
   tabContent.style.marginTop = "-1px";
+  tabContent.style.background = "#fafafa";
+
+  // ✅ Bullet point styles for <ul><li>
+  tabContent.style.fontSize = "16px";
+  tabContent.style.lineHeight = "1.6";
+  tabContent.style.color = "#333";
+
+  // Optional: style bullet list spacing globally
+  tabContent.innerHTML = `<style>
+    ul { margin: 10px 0 10px 20px; padding-left: 20px; }
+    li { margin-bottom: 6px; }
+  </style>`;
 
   tabTitles.forEach((key, i) => {
     if (!dmData[key]) return;
@@ -148,11 +160,19 @@ const createTabs = (dmData) => {
     tab.addEventListener("click", () => {
       Array.from(tabHeader.children).forEach(li => li.style.background = "#eee");
       tab.style.background = "#fff";
-      tabContent.innerHTML = dmData[key];
+      tabContent.innerHTML = `
+        <style>
+          ul { margin: 10px 0 10px 20px; padding-left: 20px; }
+          li { margin-bottom: 6px; }
+        </style>
+        ${dmData[key]}
+      `;
     });
 
     tabHeader.appendChild(tab);
-    if (i === 0) tabContent.innerHTML = dmData[key];
+    if (i === 0) {
+      tabContent.innerHTML += dmData[key]; // First tab content on load
+    }
   });
 
   container.appendChild(tabHeader);
