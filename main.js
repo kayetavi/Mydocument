@@ -110,6 +110,9 @@ const createTabs = (dmData) => {
 
   const container = document.createElement("div");
   container.style.padding = "10px";
+  container.style.display = "flex";
+  container.style.flexDirection = "column";
+  container.style.height = "calc(100vh - 100px)"; // full screen minus header/button space
 
   const tabHeader = document.createElement("ul");
   tabHeader.style.display = "flex";
@@ -120,8 +123,7 @@ const createTabs = (dmData) => {
 
   const tabContent = document.createElement("div");
   tabContent.style.padding = "15px";
-  tabContent.style.minHeight = "250px";
-  tabContent.style.maxHeight = "400px";
+  tabContent.style.flex = "1";
   tabContent.style.overflowY = "auto";
   tabContent.style.border = "1px solid #ccc";
   tabContent.style.marginTop = "-1px";
