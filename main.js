@@ -10,6 +10,7 @@ fetch("HCU-Model-Final.svg")
     const dmListItems = document.querySelectorAll("#dm-list li");
     let blinkIntervals = [];
 
+    // Set viewBox if missing
     if (!svgRoot.getAttribute("viewBox")) {
       const vb = svgRoot.getBBox();
       svgRoot.setAttribute("viewBox", `${vb.x} ${vb.y} ${vb.width} ${vb.height}`);
@@ -17,14 +18,14 @@ fetch("HCU-Model-Final.svg")
 
     const viewBox = svgRoot.viewBox.baseVal;
 
+    // Click on DM item
     dmListItems.forEach(item => {
       item.addEventListener("click", () => {
         const dmCode = item.getAttribute("data-dm").trim();
         selectedDMCode = dmCode;
-
         document.getElementById("showDetailsMsg").style.display = "inline-block";
 
-        // Clear old blinking
+        // Stop previous blinks
         blinkIntervals.forEach(interval => clearInterval(interval));
         blinkIntervals = [];
 
@@ -35,24 +36,15 @@ fetch("HCU-Model-Final.svg")
           txt.style.filter = "";
         });
 
-        let count = 0;
         svgRoot.querySelectorAll("text, tspan").forEach(txt => {
           const cleanText = txt.textContent.replace(/\s+/g, '').trim();
           if (cleanText === dmCode) {
-            count++;
             let visible = true;
             const interval = setInterval(() => {
-              if (visible) {
-                txt.style.fill = "red";
-                txt.style.stroke = "#00ffff";
-                txt.style.strokeWidth = "3px";
-                txt.style.filter = "drop-shadow(0 0 6px #00ffff) drop-shadow(0 0 12px red)";
-              } else {
-                txt.style.fill = "#00ffff";
-                txt.style.stroke = "red";
-                txt.style.strokeWidth = "3px";
-                txt.style.filter = "drop-shadow(0 0 6px red) drop-shadow(0 0 12px #00ffff)";
-              }
+              txt.style.fill = visible ? "red" : "#00ffff";
+              txt.style.stroke = visible ? "#00ffff" : "red";
+              txt.style.strokeWidth = "3px";
+              txt.style.filter = `drop-shadow(0 0 6px ${visible ? "#00ffff" : "red"}) drop-shadow(0 0 12px ${visible ? "red" : "#00ffff"})`;
               visible = !visible;
             }, 500);
             blinkIntervals.push(interval);
@@ -61,9 +53,8 @@ fetch("HCU-Model-Final.svg")
       });
     });
 
-    // Zoom and pan logic
-    let isPanning = false;
-    let startX, startY;
+    // Pan and zoom logic
+    let isPanning = false, startX, startY;
 
     svgRoot.addEventListener("mousedown", (e) => {
       isPanning = true;
@@ -96,7 +87,7 @@ fetch("HCU-Model-Final.svg")
     });
   });
 
-// Modal controls
+// Open modal popup
 function openModal() {
   if (!selectedDMCode || !damageMechanisms[selectedDMCode]) {
     alert("No details found.");
@@ -105,11 +96,12 @@ function openModal() {
   showPopup(selectedDMCode);
 }
 
+// Close modal
 function closeModal() {
   document.getElementById("popupModal").style.display = "none";
 }
 
-// Create tab layout
+// Tab layout
 const createTabs = (dmData) => {
   const tabTitles = [
     "description", "affectedUnits", "mitigation",
@@ -134,17 +126,11 @@ const createTabs = (dmData) => {
   tabContent.style.border = "1px solid #ccc";
   tabContent.style.marginTop = "-1px";
   tabContent.style.background = "#fafafa";
-
-  // ✅ Bullet point styles for <ul><li>
   tabContent.style.fontSize = "16px";
   tabContent.style.lineHeight = "1.6";
   tabContent.style.color = "#333";
 
-  // Optional: style bullet list spacing globally
-  tabContent.innerHTML = `<style>
-    ul { margin: 10px 0 10px 20px; padding-left: 20px; }
-    li { margin-bottom: 6px; }
-  </style>`;
+  let firstTabLoaded = false;
 
   tabTitles.forEach((key, i) => {
     if (!dmData[key]) return;
@@ -155,11 +141,12 @@ const createTabs = (dmData) => {
     tab.style.padding = "10px 15px";
     tab.style.border = "1px solid #ccc";
     tab.style.borderBottom = "none";
-    tab.style.background = i === 0 ? "#fff" : "#eee";
+    tab.style.background = firstTabLoaded ? "#eee" : "#fff";
 
     tab.addEventListener("click", () => {
-      Array.from(tabHeader.children).forEach(li => li.style.background = "#eee");
+      [...tabHeader.children].forEach(li => li.style.background = "#eee");
       tab.style.background = "#fff";
+
       tabContent.innerHTML = `
         <style>
           ul { margin: 10px 0 10px 20px; padding-left: 20px; }
@@ -170,8 +157,16 @@ const createTabs = (dmData) => {
     });
 
     tabHeader.appendChild(tab);
-    if (i === 0) {
-      tabContent.innerHTML += dmData[key]; // First tab content on load
+
+    if (!firstTabLoaded) {
+      tabContent.innerHTML = `
+        <style>
+          ul { margin: 10px 0 10px 20px; padding-left: 20px; }
+          li { margin-bottom: 6px; }
+        </style>
+        ${dmData[key]}
+      `;
+      firstTabLoaded = true;
     }
   });
 
@@ -180,7 +175,7 @@ const createTabs = (dmData) => {
   return container;
 };
 
-// Stable popup window with fixed size
+// Show popup full screen
 const showPopup = (dmId) => {
   const dmData = damageMechanisms[dmId];
   if (!dmData) {
@@ -198,8 +193,6 @@ const showPopup = (dmId) => {
   popup.style.zIndex = "1000";
   popup.style.overflowY = "auto";
   popup.style.padding = "20px";
-  popup.style.border = "none";
-  popup.style.borderRadius = "0";
 
   const closeBtn = document.createElement("button");
   closeBtn.textContent = "Close";
