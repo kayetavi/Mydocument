@@ -1,189 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Damage Mechanism Highlight + Manual Zoom</title>
+  <meta charset="UTF-8" />
+  <title>Damage Mechanism Demo</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      display: flex;
+    .mechanism-item { cursor: pointer; padding: 6px; margin: 4px; background: #f0f0f0; }
+    .blink { animation: blink 1s infinite; }
+    @keyframes blink {
+      50% { background-color: yellow; }
     }
-    .container {
-      display: flex;
-      width: 100%;
-    }
-    .sidebar {
-      width: 220px;
-      background: #f4f4f4;
-      padding: 10px;
-      border-right: 1px solid #ccc;
-    }
-    .sidebar h3 {
-      margin-top: 0;
-    }
-    .sidebar ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-    .sidebar li {
-      padding: 5px;
-      cursor: pointer;
-      border-radius: 4px;
-      transition: background 0.3s ease;
-    }
-    .sidebar li:hover {
-      background: #ddd;
-    }
-    .drawing {
-      flex: 1;
-      padding: 0;
-      overflow: hidden;
-      background: #fff;
-      position: relative;
-    }
-    #svgContainer {
-      width: 100%;
-      height: 95vh;
-      border: 1px solid #ccc;
-      cursor: grab;
+    #detailsBtn { display: none; margin-top: 10px; }
+    #popup {
+      display: none;
+      position: fixed; top: 20%; left: 30%;
+      background: white; padding: 20px; border: 2px solid black; width: 40%;
     }
   </style>
 </head>
 <body>
-<div class="container">
-  <div class="sidebar">
-    <h3>Damage Mechanisms</h3>
-    <ul id="dm-list">
-      <li data-dm="1">1 - Sulfidation</li>
-      <li data-dm="2">2 - Wet H2S Damage (Blistering/HIC/SOHIC/SSC)</li>
-      <li data-dm="3">3 - Creep and Stress Rupture</li>
-      <li data-dm="4">4 - High-temperature H2/H2S Corrosion</li>
-      <li data-dm="5">5 - Polythionic Acid SCC</li>
-      <li data-dm="6">6 - Naphthenic Acid Corrosion</li>
-      <li data-dm="7">7 - Ammonium Bisulfide Corrosion</li>
-      <li data-dm="8">8 - Ammonium Chloride Corrosion</li>
-      <li data-dm="9">9 - HCL Corrosion</li>
-      <li data-dm="10">10 - High-temperature Hydrogen Attack</li>
-      <li data-dm="16">16 - Temper Embrittlement</li>
-      <li data-dm="20">20 - Erosion/Erosion-Corrosion</li>
-      <li data-dm="22">22 - Amine SCC</li>
-      <li data-dm="23">23 - Choride SCC</li>
-      <li data-dm="25">25 - Hydrogen Embrittlement</li>
-      <li data-dm="30">30 - Short-term Overheating—Stress Rupture</li>
-      <li data-dm="31">31 - Brittle Fracture</li>
-      <li data-dm="32">32 - Sigma Phase Embrittlement</li>
-      <li data-dm="35">35 - Stress Relaxation Cracking</li>
-      <li data-dm="45">45 - Amine Corrosion</li>
-      <li data-dm="46">46 - Corrosion Under Insulation</li>
-    </ul>
+
+  <div id="mechanismList">
+    <div class="mechanism-item" data-dm="1">Sulfidation</div>
+    <div class="mechanism-item" data-dm="2">Wet H2S Damage</div>
+    <div class="mechanism-item" data-dm="3">Creep</div>
   </div>
 
-  <div class="drawing">
-    <div id="svgContainer"></div>
+  <button id="detailsBtn">📘 Show Details</button>
+
+  <div id="popup">
+    <h3 id="popupTitle"></h3>
+    <p id="popupDesc"></p>
+    <button onclick="document.getElementById('popup').style.display='none'">Close</button>
   </div>
-</div>
 
-<script>
-// ✅ Load SVG Inline
-fetch("HCU-Model-Final.svg")
-  .then(res => res.text())
-  .then(data => {
-    document.getElementById("svgContainer").innerHTML = data;
+  <script type="module">
+    import { damageMechanismDetails } from './Damagemechanism.js';
 
-    const svgRoot = document.querySelector("#svgContainer svg");
-    const dmListItems = document.querySelectorAll("#dm-list li");
-    let blinkIntervals = [];
+    const items = document.querySelectorAll(".mechanism-item");
+    const detailsBtn = document.getElementById("detailsBtn");
+    let selectedDM = null;
 
-    // ✅ Set Initial ViewBox if missing
-    if (!svgRoot.getAttribute("viewBox")) {
-      const vb = svgRoot.getBBox();
-      svgRoot.setAttribute("viewBox", `${vb.x} ${vb.y} ${vb.width} ${vb.height}`);
-    }
-    const viewBox = svgRoot.viewBox.baseVal;
-
-    // ✅ Highlight + Blink + Glow
-    dmListItems.forEach(item => {
+    items.forEach(item => {
       item.addEventListener("click", () => {
-        const selectedDM = item.getAttribute("data-dm").trim();
-        console.clear();
-        console.log("Selected DM:", selectedDM);
-
-        blinkIntervals.forEach(interval => clearInterval(interval));
-        blinkIntervals = [];
-
-        svgRoot.querySelectorAll("text, tspan").forEach(txt => {
-          txt.style.fill = "";
-          txt.style.stroke = "";
-          txt.style.strokeWidth = "";
-          txt.style.filter = "";
-        });
-
-        let count = 0;
-        svgRoot.querySelectorAll("text, tspan").forEach(txt => {
-          const cleanText = txt.textContent.replace(/\s+/g, '').trim();
-          if (cleanText === selectedDM) {
-            count++;
-            let visible = true;
-            const interval = setInterval(() => {
-              if (visible) {
-                txt.style.fill = "red";
-                txt.style.stroke = "#00ffff";
-                txt.style.strokeWidth = "3px";
-                txt.style.filter =
-                  "drop-shadow(0 0 6px #00ffff) drop-shadow(0 0 12px red)";
-              } else {
-                txt.style.fill = "#00ffff";
-                txt.style.stroke = "red";
-                txt.style.strokeWidth = "3px";
-                txt.style.filter =
-                  "drop-shadow(0 0 6px red) drop-shadow(0 0 12px #00ffff)";
-              }
-              visible = !visible;
-            }, 500);
-            blinkIntervals.push(interval);
-          }
-        });
-
-        console.log("Matched Elements:", count);
+        items.forEach(i => i.classList.remove("blink")); // Remove previous blinking
+        item.classList.add("blink"); // Start blinking
+        selectedDM = item.getAttribute("data-dm");
+        detailsBtn.style.display = "inline"; // Show "Show Details" button
       });
     });
 
-    // ✅ Manual Zoom & Pan
-    let isPanning = false;
-    let startX, startY;
-
-    svgRoot.addEventListener("mousedown", (e) => {
-      isPanning = true;
-      startX = e.clientX;
-      startY = e.clientY;
-      svgRoot.style.cursor = "grabbing";
+    detailsBtn.addEventListener("click", () => {
+      if (selectedDM && damageMechanismDetails[selectedDM]) {
+        const data = damageMechanismDetails[selectedDM];
+        document.getElementById("popupTitle").innerText = data.title;
+        document.getElementById("popupDesc").innerText = data.description;
+        document.getElementById("popup").style.display = "block";
+      }
     });
-
-    window.addEventListener("mouseup", () => {
-      isPanning = false;
-      svgRoot.style.cursor = "grab";
-    });
-
-    window.addEventListener("mousemove", (e) => {
-      if (!isPanning) return;
-      const dx = (e.clientX - startX) * (viewBox.width / svgRoot.clientWidth);
-      const dy = (e.clientY - startY) * (viewBox.height / svgRoot.clientHeight);
-      viewBox.x -= dx;
-      viewBox.y -= dy;
-      startX = e.clientX;
-      startY = e.clientY;
-    });
-
-    svgRoot.addEventListener("wheel", (e) => {
-      e.preventDefault();
-      const zoomFactor = 1.1;
-      const scale = e.deltaY < 0 ? 1 / zoomFactor : zoomFactor;
-      viewBox.width *= scale;
-      viewBox.height *= scale;
-    });
-  });
-</script>
+  </script>
 </body>
 </html>
