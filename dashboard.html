@@ -263,5 +263,108 @@
   }
 </script>
 
+  
+<script>
+  // DOM utility
+  const createTabs = (dmData) => {
+    const tabTitles = [
+      "description", "affectedUnits", "mitigation",
+      "inspection", "appearance", "criticalFactors", "temperatureComparison"
+    ];
+    
+    const container = document.createElement("div");
+    container.style.padding = "10px";
+
+    const tabHeader = document.createElement("ul");
+    tabHeader.style.display = "flex";
+    tabHeader.style.listStyle = "none";
+    tabHeader.style.margin = "0";
+    tabHeader.style.padding = "0";
+    tabHeader.style.borderBottom = "1px solid #ccc";
+
+    const tabContent = document.createElement("div");
+    tabContent.style.padding = "10px";
+
+    tabTitles.forEach((key, i) => {
+      if (!dmData[key]) return;
+
+      const tab = document.createElement("li");
+      tab.textContent = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+      tab.style.cursor = "pointer";
+      tab.style.padding = "10px 15px";
+      tab.style.border = "1px solid #ccc";
+      tab.style.borderBottom = "none";
+      tab.style.background = i === 0 ? "#fff" : "#eee";
+      tab.addEventListener("click", () => {
+        Array.from(tabHeader.children).forEach(li => li.style.background = "#eee");
+        tab.style.background = "#fff";
+        tabContent.innerHTML = dmData[key];
+      });
+      tabHeader.appendChild(tab);
+      if (i === 0) tabContent.innerHTML = dmData[key];
+    });
+
+    container.appendChild(tabHeader);
+    container.appendChild(tabContent);
+    return container;
+  };
+
+  const showPopup = (dmId) => {
+    const dmData = damageMechanisms[dmId];
+    if (!dmData) {
+      alert("No data available");
+      return;
+    }
+
+    const popup = document.createElement("div");
+    popup.style.position = "fixed";
+    popup.style.top = "50%";
+    popup.style.left = "50%";
+    popup.style.transform = "translate(-50%, -50%)";
+    popup.style.background = "#fff";
+    popup.style.border = "2px solid #444";
+    popup.style.boxShadow = "0 0 10px rgba(0,0,0,0.4)";
+    popup.style.zIndex = "1000";
+    popup.style.maxWidth = "800px";
+    popup.style.maxHeight = "90vh";
+    popup.style.overflowY = "auto";
+    popup.style.padding = "15px";
+    popup.style.borderRadius = "8px";
+
+    const closeBtn = document.createElement("button");
+    closeBtn.textContent = "Close";
+    closeBtn.style.marginBottom = "10px";
+    closeBtn.onclick = () => popup.remove();
+
+    popup.appendChild(closeBtn);
+    popup.appendChild(createTabs(dmData));
+
+    document.body.appendChild(popup);
+  };
+
+  // Update list click handlers to include "Show Details" message and popup
+  document.querySelectorAll("#dm-list li").forEach(item => {
+    item.addEventListener("click", () => {
+      const dmId = item.getAttribute("data-dm");
+      let msg = item.querySelector(".show-details-msg");
+
+      if (!msg) {
+        msg = document.createElement("div");
+        msg.className = "show-details-msg";
+        msg.textContent = "Show Details";
+        msg.style.color = "blue";
+        msg.style.cursor = "pointer";
+        msg.style.marginTop = "5px";
+        msg.onclick = (e) => {
+          e.stopPropagation();
+          showPopup(dmId);
+        };
+        item.appendChild(msg);
+      }
+    });
+  });
+      </script>
+
+  
 </body>
 </html>
