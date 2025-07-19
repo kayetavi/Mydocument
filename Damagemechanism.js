@@ -1,15 +1,15 @@
-const DamageMechanism = {
+// DamageMechanism.js
+const damageMechanisms = {
   "1": {
-    title: "Sulfidation",
-    description: "Occurs due to high temperature sulfur compounds attacking metal surfaces."
+    name: "Sulfidation",
+    description: `<ul><li>Corrosion of carbon steel ...</li></ul>`,
+    affectedUnits: `<ul><li>Sulfidation occurs in ...</li></ul>`,
+    mitigation: `<ul><li>Upgrade to higher-chromium ...</li></ul>`,
+    inspection: `<ul><li>Use UT thickness ...</li></ul>`,
+    appearance: `<ul><li>Corrosion typically ...</li></ul>`,
+    criticalFactors: `<ul><li>Key factors influencing ...</li></ul>`,
+    temperatureComparison: `<ul><li><strong>High-Temperature Sulfidation Onset:</strong>...</li></ul>`,
+    imagePath: "image/sulfidation.png"
   },
-  "2": {
-    title: "Wet H2S Damage",
-    description: "Causes blistering, HIC, SOHIC or SSC in presence of H2S and water."
-  },
-  "3": {
-    title: "Creep and Stress Rupture",
-    description: "Time-dependent high-temperature failure mechanism."
-  },
-  // Add other keys like "4", "5", ... as needed
+  // Add more damage mechanisms here using keys: "2", "3", ...
 };
