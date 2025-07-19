@@ -109,7 +109,7 @@ function closeModal() {
   document.getElementById("popupModal").style.display = "none";
 }
 
-// Popup Tabs UI
+// Create tab layout
 const createTabs = (dmData) => {
   const tabTitles = [
     "description", "affectedUnits", "mitigation",
@@ -128,6 +128,11 @@ const createTabs = (dmData) => {
 
   const tabContent = document.createElement("div");
   tabContent.style.padding = "10px";
+  tabContent.style.minHeight = "250px";
+  tabContent.style.maxHeight = "400px";
+  tabContent.style.overflowY = "auto";
+  tabContent.style.border = "1px solid #ccc";
+  tabContent.style.marginTop = "-1px";
 
   tabTitles.forEach((key, i) => {
     if (!dmData[key]) return;
@@ -139,6 +144,7 @@ const createTabs = (dmData) => {
     tab.style.border = "1px solid #ccc";
     tab.style.borderBottom = "none";
     tab.style.background = i === 0 ? "#fff" : "#eee";
+
     tab.addEventListener("click", () => {
       Array.from(tabHeader.children).forEach(li => li.style.background = "#eee");
       tab.style.background = "#fff";
@@ -154,6 +160,7 @@ const createTabs = (dmData) => {
   return container;
 };
 
+// Stable popup window with fixed size
 const showPopup = (dmId) => {
   const dmData = damageMechanisms[dmId];
   if (!dmData) {
@@ -170,7 +177,9 @@ const showPopup = (dmId) => {
   popup.style.border = "2px solid #444";
   popup.style.boxShadow = "0 0 10px rgba(0,0,0,0.4)";
   popup.style.zIndex = "1000";
-  popup.style.maxWidth = "800px";
+  popup.style.width = "700px";
+  popup.style.maxWidth = "90vw";
+  popup.style.minHeight = "450px";
   popup.style.maxHeight = "90vh";
   popup.style.overflowY = "auto";
   popup.style.padding = "15px";
