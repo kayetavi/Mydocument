@@ -246,17 +246,13 @@
     });
 
   // ✅ Modal functions
-  function openModal() {
-    if (!selectedDMCode || !DamageMechanism[selectedDMCode]) {
-      alert("No details found.");
-      return;
-    }
-
-    const data = DamageMechanism[selectedDMCode];
-    document.getElementById("modalTitle").innerText = data.title;
-    document.getElementById("modalDescription").innerText = data.description;
-    document.getElementById("popupModal").style.display = "block";
+ function openModal() {
+  if (!selectedDMCode || !damageMechanisms[selectedDMCode]) {
+    alert("No details found.");
+    return;
   }
+  showPopup(selectedDMCode);
+                              }
 
   function closeModal() {
     document.getElementById("popupModal").style.display = "none";
@@ -342,27 +338,6 @@
     document.body.appendChild(popup);
   };
 
-  // Update list click handlers to include "Show Details" message and popup
-  document.querySelectorAll("#dm-list li").forEach(item => {
-    item.addEventListener("click", () => {
-      const dmId = item.getAttribute("data-dm");
-      let msg = item.querySelector(".show-details-msg");
-
-      if (!msg) {
-        msg = document.createElement("div");
-        msg.className = "show-details-msg";
-        msg.textContent = "Show Details";
-        msg.style.color = "blue";
-        msg.style.cursor = "pointer";
-        msg.style.marginTop = "5px";
-        msg.onclick = (e) => {
-          e.stopPropagation();
-          showPopup(dmId);
-        };
-        item.appendChild(msg);
-      }
-    });
-  });
       </script>
 
   
