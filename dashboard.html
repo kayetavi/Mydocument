@@ -1,153 +1,267 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Damage Mechanism Dashboard</title>
+  <meta charset="UTF-8">
+  <title>Damage Mechanism Highlight + Manual Zoom</title>
   <style>
     body {
-      font-family: Arial;
+      font-family: Arial, sans-serif;
       margin: 0;
       display: flex;
     }
-
-    .sidebar {
-      width: 250px;
-      background: #1f2937;
-      color: white;
-      padding: 20px;
-      height: 100vh;
+    .container {
+      display: flex;
+      width: 100%;
     }
-
-    .sidebar h2 {
+    .sidebar {
+      width: 220px;
+      background: #f4f4f4;
+      padding: 10px;
+      border-right: 1px solid #ccc;
+    }
+    .sidebar h3 {
       margin-top: 0;
     }
-
-    .damage-item {
-      padding: 10px;
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .sidebar li {
+      padding: 5px;
       cursor: pointer;
-      border-radius: 5px;
+      border-radius: 4px;
+      transition: background 0.3s ease;
+    }
+    .sidebar li:hover {
+      background: #ddd;
+    }
+    .drawing {
+      flex: 1;
+      padding: 0;
+      overflow: hidden;
+      background: #fff;
+      position: relative;
+    }
+    #svgContainer {
+      width: 100%;
+      height: 95vh;
+      border: 1px solid #ccc;
+      cursor: grab;
     }
 
-    .damage-item:hover {
-      background-color: #374151;
-    }
-
-    .selected {
-      animation: blink 0.6s step-end infinite alternate;
-      background-color: #4b5563;
+    /* ✅ Show Details Blink */
+    #showDetailsMsg {
+      position: absolute;
+      top: 10px;
+      left: 240px;
+      background: yellow;
+      color: red;
+      font-weight: bold;
+      padding: 5px 10px;
+      border: 1px solid red;
+      display: none;
+      animation: blink 1s infinite;
+      cursor: pointer;
+      z-index: 10;
     }
 
     @keyframes blink {
-      from { border-left: 5px solid #facc15; }
-      to { border-left: 5px solid transparent; }
+      50% { opacity: 0; }
     }
 
-    .content {
-      padding: 30px;
-      flex: 1;
-    }
-
-    .show-details-btn {
-      margin-top: 20px;
-      padding: 10px 15px;
-      font-size: 16px;
-      cursor: pointer;
-      background-color: #2563eb;
-      color: white;
-      border: none;
-      border-radius: 5px;
-    }
-
-    .modal {
+    /* ✅ Modal */
+    #popupModal {
       display: none;
       position: fixed;
-      top: 20%;
-      left: 50%;
-      transform: translate(-50%, -20%);
-      background: white;
-      padding: 20px;
-      border: 2px solid #ccc;
-      z-index: 1000;
-      width: 400px;
-      border-radius: 8px;
+      z-index: 999;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
     }
 
-    .modal h3 {
+    .modal-content {
+      background: #fff;
+      padding: 20px;
+      margin: 10% auto;
+      width: 50%;
+      border-radius: 8px;
+      position: relative;
+    }
+
+    .modal-content h2 {
       margin-top: 0;
     }
 
-    .overlay {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      height: 100%;
-      width: 100%;
-      background: rgba(0,0,0,0.6);
-      z-index: 999;
+    .closeBtn {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 20px;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
+
+<div class="container">
   <div class="sidebar">
-    <h2>Damage Mechanisms</h2>
-    <div id="damageList">
-      <div class="damage-item" data-key="cui">CUI (Corrosion Under Insulation)</div>
-      <div class="damage-item" data-key="sulfidation">Sulfidation</div>
-      <div class="damage-item" data-key="oxidation">Oxidation</div>
-      <div class="damage-item" data-key="acidSourWater">Acid Sour Water</div>
-      <!-- Add more as needed -->
-    </div>
+    <h3>Damage Mechanisms</h3>
+    <ul id="dm-list">
+      <li data-dm="1">1 - Sulfidation</li>
+      <li data-dm="2">2 - Wet H2S Damage (Blistering/HIC/SOHIC/SSC)</li>
+      <li data-dm="3">3 - Creep and Stress Rupture</li>
+      <li data-dm="4">4 - High-temperature H2/H2S Corrosion</li>
+      <li data-dm="5">5 - Polythionic Acid SCC</li>
+      <li data-dm="6">6 - Naphthenic Acid Corrosion</li>
+      <li data-dm="7">7 - Ammonium Bisulfide Corrosion</li>
+      <li data-dm="8">8 - Ammonium Chloride Corrosion</li>
+      <li data-dm="9">9 - HCL Corrosion</li>
+      <li data-dm="10">10 - High-temperature Hydrogen Attack</li>
+      <li data-dm="16">16 - Temper Embrittlement</li>
+      <li data-dm="20">20 - Erosion/Erosion-Corrosion</li>
+      <li data-dm="22">22 - Amine SCC</li>
+      <li data-dm="23">23 - Choride SCC</li>
+      <li data-dm="25">25 - Hydrogen Embrittlement</li>
+      <li data-dm="30">30 - Short-term Overheating—Stress Rupture</li>
+      <li data-dm="31">31 - Brittle Fracture</li>
+      <li data-dm="32">32 - Sigma Phase Embrittlement</li>
+      <li data-dm="35">35 - Stress Relaxation Cracking</li>
+      <li data-dm="45">45 - Amine Corrosion</li>
+      <li data-dm="46">46 - Corrosion Under Insulation</li>
+    </ul>
   </div>
 
-  <div class="content">
-    <h1>Welcome to Damage Mechanism Dashboard</h1>
-    <div id="messageArea"></div>
+  <div class="drawing">
+    <div id="showDetailsMsg" onclick="openModal()">🔍 Show Details</div>
+    <div id="svgContainer"></div>
   </div>
+</div>
 
-  <div class="overlay" id="overlay"></div>
-  <div class="modal" id="detailModal">
-    <h3 id="detailTitle"></h3>
-    <p id="detailDescription"></p>
-    <button onclick="closeModal()">Close</button>
+<!-- ✅ Modal HTML -->
+<div id="popupModal">
+  <div class="modal-content">
+    <span class="closeBtn" onclick="closeModal()">&times;</span>
+    <h2 id="modalTitle">Damage Mechanism</h2>
+    <p id="modalDescription">Details will load here...</p>
   </div>
+</div>
 
-  <script type="module">
-    import { damageMechanismData } from './Damagemechanism.js';
+<!-- ✅ Include DamageMechanism data -->
+<script src="Damagemechanism.js"></script>
 
-    const damageItems = document.querySelectorAll('.damage-item');
-    const messageArea = document.getElementById('messageArea');
+<script>
+  let selectedDMCode = null;
 
-    let currentKey = null;
+  fetch("HCU-Model-Final.svg")
+    .then(res => res.text())
+    .then(data => {
+      document.getElementById("svgContainer").innerHTML = data;
 
-    damageItems.forEach(item => {
-      item.addEventListener('click', () => {
-        damageItems.forEach(i => i.classList.remove('selected'));
-        item.classList.add('selected');
-        currentKey = item.getAttribute('data-key');
+      const svgRoot = document.querySelector("#svgContainer svg");
+      const dmListItems = document.querySelectorAll("#dm-list li");
+      let blinkIntervals = [];
 
-        messageArea.innerHTML = `
-          <p><strong>Show Details</strong></p>
-          <button class="show-details-btn" onclick="showDetail()">Show Details</button>
-        `;
+      if (!svgRoot.getAttribute("viewBox")) {
+        const vb = svgRoot.getBBox();
+        svgRoot.setAttribute("viewBox", `${vb.x} ${vb.y} ${vb.width} ${vb.height}`);
+      }
+      const viewBox = svgRoot.viewBox.baseVal;
+
+      dmListItems.forEach(item => {
+        item.addEventListener("click", () => {
+          const dmCode = item.getAttribute("data-dm").trim();
+          selectedDMCode = dmCode;
+
+          document.getElementById("showDetailsMsg").style.display = "inline-block";
+
+          blinkIntervals.forEach(interval => clearInterval(interval));
+          blinkIntervals = [];
+
+          svgRoot.querySelectorAll("text, tspan").forEach(txt => {
+            txt.style.fill = "";
+            txt.style.stroke = "";
+            txt.style.strokeWidth = "";
+            txt.style.filter = "";
+          });
+
+          let count = 0;
+          svgRoot.querySelectorAll("text, tspan").forEach(txt => {
+            const cleanText = txt.textContent.replace(/\s+/g, '').trim();
+            if (cleanText === dmCode) {
+              count++;
+              let visible = true;
+              const interval = setInterval(() => {
+                if (visible) {
+                  txt.style.fill = "red";
+                  txt.style.stroke = "#00ffff";
+                  txt.style.strokeWidth = "3px";
+                  txt.style.filter = "drop-shadow(0 0 6px #00ffff) drop-shadow(0 0 12px red)";
+                } else {
+                  txt.style.fill = "#00ffff";
+                  txt.style.stroke = "red";
+                  txt.style.strokeWidth = "3px";
+                  txt.style.filter = "drop-shadow(0 0 6px red) drop-shadow(0 0 12px #00ffff)";
+                }
+                visible = !visible;
+              }, 500);
+              blinkIntervals.push(interval);
+            }
+          });
+        });
+      });
+
+      let isPanning = false;
+      let startX, startY;
+
+      svgRoot.addEventListener("mousedown", (e) => {
+        isPanning = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        svgRoot.style.cursor = "grabbing";
+      });
+
+      window.addEventListener("mouseup", () => {
+        isPanning = false;
+        svgRoot.style.cursor = "grab";
+      });
+
+      window.addEventListener("mousemove", (e) => {
+        if (!isPanning) return;
+        const dx = (e.clientX - startX) * (viewBox.width / svgRoot.clientWidth);
+        const dy = (e.clientY - startY) * (viewBox.height / svgRoot.clientHeight);
+        viewBox.x -= dx;
+        viewBox.y -= dy;
+        startX = e.clientX;
+        startY = e.clientY;
+      });
+
+      svgRoot.addEventListener("wheel", (e) => {
+        e.preventDefault();
+        const zoomFactor = 1.1;
+        const scale = e.deltaY < 0 ? 1 / zoomFactor : zoomFactor;
+        viewBox.width *= scale;
+        viewBox.height *= scale;
       });
     });
 
-    window.showDetail = function () {
-      if (!currentKey) return;
-      const data = damageMechanismData[currentKey];
-      if (data) {
-        document.getElementById('detailTitle').innerText = data.title;
-        document.getElementById('detailDescription').innerText = data.description;
-        document.getElementById('overlay').style.display = 'block';
-        document.getElementById('detailModal').style.display = 'block';
-      }
-    };
+  // ✅ Modal functions
+  function openModal() {
+    if (!selectedDMCode || !DamageMechanism[selectedDMCode]) {
+      alert("No details found.");
+      return;
+    }
 
-    window.closeModal = function () {
-      document.getElementById('overlay').style.display = 'none';
-      document.getElementById('detailModal').style.display = 'none';
-    };
-  </script>
+    const data = DamageMechanism[selectedDMCode];
+    document.getElementById("modalTitle").innerText = data.title;
+    document.getElementById("modalDescription").innerText = data.description;
+    document.getElementById("popupModal").style.display = "block";
+  }
+
+  function closeModal() {
+    document.getElementById("popupModal").style.display = "none";
+  }
+</script>
+
 </body>
 </html>
