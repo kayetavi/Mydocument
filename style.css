@@ -171,33 +171,29 @@ button {
 
 /* ✅ Flow diagram css */
 
-/* ✅ Base Layout Styling */
+/* ✅ Base Styling */
 body {
   font-family: Arial, sans-serif;
   margin: 0;
   display: flex;
-  height: 100vh;
-  background-color: #f9f9f9;
 }
 
+/* ✅ Container Layout */
 .container {
   display: flex;
   width: 100%;
 }
 
-/* ✅ Sidebar */
+/* ✅ Sidebar Styling */
 .sidebar {
   width: 220px;
   background: #f4f4f4;
   padding: 10px;
   border-right: 1px solid #ccc;
-  box-shadow: 2px 0 4px rgba(0, 0, 0, 0.05);
 }
 
 .sidebar h3 {
   margin-top: 0;
-  font-size: 18px;
-  color: #333;
 }
 
 .sidebar ul {
@@ -207,7 +203,8 @@ body {
 }
 
 .sidebar li {
-  padding: 8px 10px;
+  padding: 8px;
+  margin-bottom: 4px;
   cursor: pointer;
   border-radius: 4px;
   transition: background 0.3s ease;
@@ -233,7 +230,7 @@ body {
   cursor: grab;
 }
 
-/* ✅ Blinking "Show Details" Message */
+/* ✅ Show Details Blink */
 #showDetailsMsg {
   position: absolute;
   top: 10px;
@@ -254,7 +251,7 @@ body {
   50% { opacity: 0; }
 }
 
-/* ✅ Modal Overlay */
+/* ✅ Modal Styling */
 #popupModal {
   display: none;
   position: fixed;
@@ -267,7 +264,6 @@ body {
   background-color: rgba(0, 0, 0, 0.5);
 }
 
-/* ✅ Modal Box */
 .modal-content {
   background: #fff;
   padding: 20px 30px;
@@ -280,13 +276,14 @@ body {
   box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
 }
 
+/* ✅ Modal Title */
 .modal-content h2 {
   margin-top: 0;
   font-size: 22px;
   color: #333;
 }
 
-/* ✅ Modal Close Button */
+/* ✅ Close Button */
 .closeBtn {
   position: absolute;
   top: 10px;
@@ -300,4 +297,4 @@ body {
 
 .closeBtn:hover {
   color: #000;
-    }
+}
