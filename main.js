@@ -7,92 +7,107 @@ fetch("HCU-Model-Final.svg")
     document.getElementById("svgContainer").innerHTML = data;
 
     const svgElement = document.querySelector("#svgContainer svg");
+    const dmListItems = document.querySelectorAll("#dm-list li");
+    let blinkIntervals = [];
+
+    // ✅ SVG Styling to prevent clipping
     svgElement.style.width = "100%";
     svgElement.style.height = "auto";
     svgElement.style.overflow = "visible";
     svgElement.style.maxWidth = "none";
     svgElement.style.cursor = "grab";
+    svgElement.setAttribute("preserveAspectRatio", "xMidYMid meet");
 
-    const svgRoot = svgElement;
-    const dmListItems = document.querySelectorAll("#dm-list li");
-    let blinkIntervals = [];
-
-    // ✅ SAFELY set viewBox (with fallback delay)
-    if (!svgRoot.hasAttribute("viewBox")) {
-      setTimeout(() => {
-        const vb = svgRoot.getBBox();
-        svgRoot.setAttribute("viewBox", `${vb.x} ${vb.y} ${vb.width} ${vb.height}`);
-      }, 100);
+    // ✅ Add viewBox if missing
+    if (!svgElement.hasAttribute("viewBox")) {
+      const vb = svgElement.getBBox();
+      svgElement.setAttribute("viewBox", `${vb.x} ${vb.y} ${vb.width} ${vb.height}`);
     }
 
-    const viewBox = svgRoot.viewBox.baseVal;
+    const viewBox = svgElement.viewBox.baseVal;
 
-    // ✅ Pan & Zoom
+    // ✅ Pan and Zoom
     let isPanning = false, startX, startY;
 
-    svgRoot.addEventListener("mousedown", (e) => {
+    svgElement.addEventListener("mousedown", (e) => {
       isPanning = true;
       startX = e.clientX;
       startY = e.clientY;
-      svgRoot.style.cursor = "grabbing";
+      svgElement.style.cursor = "grabbing";
     });
 
     window.addEventListener("mouseup", () => {
       isPanning = false;
-      svgRoot.style.cursor = "grab";
+      svgElement.style.cursor = "grab";
     });
 
     window.addEventListener("mousemove", (e) => {
       if (!isPanning) return;
-      const dx = (e.clientX - startX) * (viewBox.width / svgRoot.clientWidth);
-      const dy = (e.clientY - startY) * (viewBox.height / svgRoot.clientHeight);
+      const dx = (e.clientX - startX) * (viewBox.width / svgElement.clientWidth);
+      const dy = (e.clientY - startY) * (viewBox.height / svgElement.clientHeight);
       viewBox.x -= dx;
       viewBox.y -= dy;
       startX = e.clientX;
       startY = e.clientY;
     });
 
-    svgRoot.addEventListener("wheel", (e) => {
+    svgElement.addEventListener("wheel", (e) => {
       e.preventDefault();
       const zoomFactor = 1.1;
       const scale = e.deltaY < 0 ? 1 / zoomFactor : zoomFactor;
-      const mx = e.offsetX / svgRoot.clientWidth;
-      const my = e.offsetY / svgRoot.clientHeight;
+      const mx = e.offsetX / svgElement.clientWidth;
+      const my = e.offsetY / svgElement.clientHeight;
       const wx = viewBox.x + mx * viewBox.width;
       const wy = viewBox.y + my * viewBox.height;
 
       viewBox.width *= scale;
       viewBox.height *= scale;
-
-      // Optional: limit zoom level
       viewBox.width = Math.max(100, Math.min(10000, viewBox.width));
       viewBox.height = Math.max(100, Math.min(10000, viewBox.height));
-
       viewBox.x = wx - mx * viewBox.width;
       viewBox.y = wy - my * viewBox.height;
     });
 
-    // ✅ Click on DM item
+    // ✅ Click DM item: Highlight + Blink
     dmListItems.forEach(item => {
       item.addEventListener("click", () => {
         const dmCode = item.getAttribute("data-dm").trim();
         selectedDMCode = dmCode;
         document.getElementById("showDetailsMsg").style.display = "inline-block";
 
+        // Stop previous blinking
         blinkIntervals.forEach(interval => clearInterval(interval));
         blinkIntervals = [];
 
-        svgRoot.querySelectorAll("text, tspan").forEach(txt => {
+        // Reset previous highlights
+        svgElement.querySelectorAll("text, tspan").forEach(txt => {
           txt.style.fill = "";
           txt.style.stroke = "";
           txt.style.strokeWidth = "";
           txt.style.filter = "";
         });
+
+        // Highlight matching DM codes
+        const matchingTexts = Array.from(svgElement.querySelectorAll("text, tspan")).filter(txt =>
+          txt.textContent.trim().startsWith(dmCode)
+        );
+
+        matchingTexts.forEach(txt => {
+          let visible = true;
+          const interval = setInterval(() => {
+            txt.style.fill = visible ? "red" : "";
+            txt.style.stroke = visible ? "black" : "";
+            txt.style.strokeWidth = visible ? "1px" : "";
+            txt.style.filter = visible ? "drop-shadow(0 0 2px yellow)" : "";
+            visible = !visible;
+          }, 500);
+          blinkIntervals.push(interval);
+        });
       });
     });
   });
 
-// Open modal popup
+// ✅ Open modal popup
 function openModal() {
   if (!selectedDMCode || !damageMechanisms[selectedDMCode]) {
     alert("No details found.");
@@ -101,12 +116,12 @@ function openModal() {
   showPopup(selectedDMCode);
 }
 
-// Close modal
+// ✅ Close modal
 function closeModal() {
   document.getElementById("popupModal").style.display = "none";
 }
 
-// Tab layout
+// ✅ Tabs generator
 const createTabs = (dmData) => {
   const tabTitles = [
     "description",
@@ -187,7 +202,7 @@ const createTabs = (dmData) => {
   return container;
 };
 
-// Show popup full screen
+// ✅ Show popup full screen
 const showPopup = (dmId) => {
   const dmData = damageMechanisms[dmId];
   if (!dmData) {
