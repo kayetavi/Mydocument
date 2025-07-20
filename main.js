@@ -6,7 +6,14 @@ fetch("HCU-Model-Final.svg")
   .then(data => {
     document.getElementById("svgContainer").innerHTML = data;
 
-    const svgRoot = document.querySelector("#svgContainer svg");
+    // ✅ Ensure SVG is fully visible and responsive
+    const svgElement = document.querySelector("#svgContainer svg");
+    svgElement.style.width = "100%";
+    svgElement.style.height = "auto";
+    svgElement.style.overflow = "visible";
+    svgElement.style.maxWidth = "none";
+
+    const svgRoot = svgElement;
     const dmListItems = document.querySelectorAll("#dm-list li");
     let blinkIntervals = [];
 
@@ -35,23 +42,9 @@ fetch("HCU-Model-Final.svg")
           txt.style.strokeWidth = "";
           txt.style.filter = "";
         });
-
-        svgRoot.querySelectorAll("text, tspan").forEach(txt => {
-          const cleanText = txt.textContent.replace(/\s+/g, '').trim();
-          if (cleanText === dmCode) {
-            let visible = true;
-            const interval = setInterval(() => {
-              txt.style.fill = visible ? "red" : "#00ffff";
-              txt.style.stroke = visible ? "#00ffff" : "red";
-              txt.style.strokeWidth = "3px";
-              txt.style.filter = `drop-shadow(0 0 6px ${visible ? "#00ffff" : "red"}) drop-shadow(0 0 12px ${visible ? "red" : "#00ffff"})`;
-              visible = !visible;
-            }, 500);
-            blinkIntervals.push(interval);
-          }
-        });
       });
     });
+  });
 
     // Pan and zoom logic
     let isPanning = false, startX, startY;
