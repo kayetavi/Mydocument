@@ -6,103 +6,88 @@ fetch("HCU-Model-Final.svg")
   .then(data => {
     document.getElementById("svgContainer").innerHTML = data;
 
-    const svgElement = document.querySelector("#svgContainer svg");
+    const svgRoot = document.querySelector("#svgContainer svg");
     const dmListItems = document.querySelectorAll("#dm-list li");
     let blinkIntervals = [];
 
-    // ✅ SVG Styling to prevent clipping
-    svgElement.style.width = "100%";
-    svgElement.style.height = "auto";
-    svgElement.style.overflow = "visible";
-    svgElement.style.maxWidth = "none";
-    svgElement.style.cursor = "grab";
-    svgElement.setAttribute("preserveAspectRatio", "xMidYMid meet");
-
-    // ✅ Add viewBox if missing
-    if (!svgElement.hasAttribute("viewBox")) {
-      const vb = svgElement.getBBox();
-      svgElement.setAttribute("viewBox", `${vb.x} ${vb.y} ${vb.width} ${vb.height}`);
+    // Set viewBox if missing
+    if (!svgRoot.getAttribute("viewBox")) {
+      const vb = svgRoot.getBBox();
+      svgRoot.setAttribute("viewBox", `${vb.x} ${vb.y} ${vb.width} ${vb.height}`);
     }
 
-    const viewBox = svgElement.viewBox.baseVal;
+    const viewBox = svgRoot.viewBox.baseVal;
 
-    // ✅ Pan and Zoom
-    let isPanning = false, startX, startY;
-
-    svgElement.addEventListener("mousedown", (e) => {
-      isPanning = true;
-      startX = e.clientX;
-      startY = e.clientY;
-      svgElement.style.cursor = "grabbing";
-    });
-
-    window.addEventListener("mouseup", () => {
-      isPanning = false;
-      svgElement.style.cursor = "grab";
-    });
-
-    window.addEventListener("mousemove", (e) => {
-      if (!isPanning) return;
-      const dx = (e.clientX - startX) * (viewBox.width / svgElement.clientWidth);
-      const dy = (e.clientY - startY) * (viewBox.height / svgElement.clientHeight);
-      viewBox.x -= dx;
-      viewBox.y -= dy;
-      startX = e.clientX;
-      startY = e.clientY;
-    });
-
-    svgElement.addEventListener("wheel", (e) => {
-      e.preventDefault();
-      const zoomFactor = 1.1;
-      const scale = e.deltaY < 0 ? 1 / zoomFactor : zoomFactor;
-      const mx = e.offsetX / svgElement.clientWidth;
-      const my = e.offsetY / svgElement.clientHeight;
-      const wx = viewBox.x + mx * viewBox.width;
-      const wy = viewBox.y + my * viewBox.height;
-
-      viewBox.width *= scale;
-      viewBox.height *= scale;
-      viewBox.width = Math.max(100, Math.min(10000, viewBox.width));
-      viewBox.height = Math.max(100, Math.min(10000, viewBox.height));
-      viewBox.x = wx - mx * viewBox.width;
-      viewBox.y = wy - my * viewBox.height;
-    });
-
-    // ✅ Click DM item: Highlight + Blink
+    // Click on DM item
     dmListItems.forEach(item => {
       item.addEventListener("click", () => {
         const dmCode = item.getAttribute("data-dm").trim();
         selectedDMCode = dmCode;
         document.getElementById("showDetailsMsg").style.display = "inline-block";
 
-        // Stop previous blinking
+        // Stop previous blinks
         blinkIntervals.forEach(interval => clearInterval(interval));
         blinkIntervals = [];
 
-        // Reset previous highlights
         svgRoot.querySelectorAll("text, tspan").forEach(txt => {
-  const rawText = txt.textContent.trim().toLowerCase();
-  const dmText = dmCode.toLowerCase();
+          txt.style.fill = "";
+          txt.style.stroke = "";
+          txt.style.strokeWidth = "";
+          txt.style.filter = "";
+        });
 
-  // Match formats like "1. Sulfidation", "1 Sulfidation", or "Sulfidation"
-  if (
-    rawText.startsWith(dmText + ".") ||
-    rawText.startsWith(dmText + " ") ||
-    rawText === dmText
-  ) {
-    let visible = true;
-    const interval = setInterval(() => {
-      txt.style.fill = visible ? "red" : "#00ffff";
-      txt.style.stroke = visible ? "#00ffff" : "red";
-      txt.style.strokeWidth = "2px";
-      txt.style.filter = `drop-shadow(0 0 6px ${visible ? "#00ffff" : "red"}) drop-shadow(0 0 12px ${visible ? "red" : "#00ffff"})`;
-      visible = !visible;
-    }, 500);
-    blinkIntervals.push(interval);
-  }
-});
+        svgRoot.querySelectorAll("text, tspan").forEach(txt => {
+          const cleanText = txt.textContent.replace(/\s+/g, '').trim();
+          if (cleanText === dmCode) {
+            let visible = true;
+            const interval = setInterval(() => {
+              txt.style.fill = visible ? "red" : "#00ffff";
+              txt.style.stroke = visible ? "#00ffff" : "red";
+              txt.style.strokeWidth = "3px";
+              txt.style.filter = `drop-shadow(0 0 6px ${visible ? "#00ffff" : "red"}) drop-shadow(0 0 12px ${visible ? "red" : "#00ffff"})`;
+              visible = !visible;
+            }, 500);
+            blinkIntervals.push(interval);
+          }
+        });
+      });
+    });
 
-// ✅ Open modal popup
+    // Pan and zoom logic
+    let isPanning = false, startX, startY;
+
+    svgRoot.addEventListener("mousedown", (e) => {
+      isPanning = true;
+      startX = e.clientX;
+      startY = e.clientY;
+      svgRoot.style.cursor = "grabbing";
+    });
+
+    window.addEventListener("mouseup", () => {
+      isPanning = false;
+      svgRoot.style.cursor = "grab";
+    });
+
+    window.addEventListener("mousemove", (e) => {
+      if (!isPanning) return;
+      const dx = (e.clientX - startX) * (viewBox.width / svgRoot.clientWidth);
+      const dy = (e.clientY - startY) * (viewBox.height / svgRoot.clientHeight);
+      viewBox.x -= dx;
+      viewBox.y -= dy;
+      startX = e.clientX;
+      startY = e.clientY;
+    });
+
+    svgRoot.addEventListener("wheel", (e) => {
+      e.preventDefault();
+      const zoomFactor = 1.1;
+      const scale = e.deltaY < 0 ? 1 / zoomFactor : zoomFactor;
+      viewBox.width *= scale;
+      viewBox.height *= scale;
+    });
+  });
+
+// Open modal popup
 function openModal() {
   if (!selectedDMCode || !damageMechanisms[selectedDMCode]) {
     alert("No details found.");
@@ -111,28 +96,23 @@ function openModal() {
   showPopup(selectedDMCode);
 }
 
-// ✅ Close modal
+// Close modal
 function closeModal() {
   document.getElementById("popupModal").style.display = "none";
 }
 
-// ✅ Tabs generator
+// Tab layout
 const createTabs = (dmData) => {
   const tabTitles = [
-    "description",
-    "affectedUnits",
-    "mitigation",
-    "inspection",
-    "appearance",
-    "criticalFactors",
-    "temperatureComparison"
+    "description", "affectedUnits", "mitigation",
+    "inspection", "appearance", "criticalFactors", "temperatureComparison"
   ];
 
   const container = document.createElement("div");
   container.style.padding = "10px";
   container.style.display = "flex";
   container.style.flexDirection = "column";
-  container.style.height = "calc(100vh - 100px)";
+  container.style.height = "calc(100vh - 100px)"; // full screen minus header/button space
 
   const tabHeader = document.createElement("ul");
   tabHeader.style.display = "flex";
@@ -154,7 +134,7 @@ const createTabs = (dmData) => {
 
   let firstTabLoaded = false;
 
-  tabTitles.forEach((key) => {
+  tabTitles.forEach((key, i) => {
     if (!dmData[key]) return;
 
     const tab = document.createElement("li");
@@ -197,7 +177,7 @@ const createTabs = (dmData) => {
   return container;
 };
 
-// ✅ Show popup full screen
+// Show popup full screen
 const showPopup = (dmId) => {
   const dmData = damageMechanisms[dmId];
   if (!dmData) {
@@ -205,6 +185,7 @@ const showPopup = (dmId) => {
     return;
   }
 
+  // Remove existing popup
   const existingPopup = document.getElementById("customPopup");
   if (existingPopup) existingPopup.remove();
 
@@ -226,6 +207,7 @@ const showPopup = (dmId) => {
   popup.style.borderRadius = "10px";
   popup.style.boxSizing = "border-box";
 
+  // Close button
   const closeBtn = document.createElement("span");
   closeBtn.textContent = "✖";
   closeBtn.style.position = "absolute";
@@ -240,6 +222,7 @@ const showPopup = (dmId) => {
   const title = document.createElement("h2");
   title.textContent = dmData.name;
 
+  // ✅ Use your tabbed layout instead of static HTML
   const tabs = createTabs(dmData);
 
   popup.appendChild(closeBtn);
