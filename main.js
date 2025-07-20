@@ -44,9 +44,8 @@ fetch("HCU-Model-Final.svg")
         });
       });
     });
-  });
 
-    // Pan and zoom logic
+    // ✅ Pan and zoom logic — moved inside
     let isPanning = false, startX, startY;
 
     svgRoot.addEventListener("mousedown", (e) => {
