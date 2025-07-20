@@ -89,8 +89,8 @@ fetch("HCU-Model-Final.svg")
 
         // Highlight matching DM codes
         const matchingTexts = Array.from(svgElement.querySelectorAll("text, tspan")).filter(txt =>
-          txt.textContent.trim().startsWith(dmCode)
-        );
+  txt.textContent.includes(dmCode)
+);
 
         matchingTexts.forEach(txt => {
           let visible = true;
