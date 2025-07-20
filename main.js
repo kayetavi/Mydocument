@@ -80,32 +80,27 @@ fetch("HCU-Model-Final.svg")
         blinkIntervals = [];
 
         // Reset previous highlights
-        svgElement.querySelectorAll("text, tspan").forEach(txt => {
-          txt.style.fill = "";
-          txt.style.stroke = "";
-          txt.style.strokeWidth = "";
-          txt.style.filter = "";
-        });
+        svgRoot.querySelectorAll("text, tspan").forEach(txt => {
+  const rawText = txt.textContent.trim().toLowerCase();
+  const dmText = dmCode.toLowerCase();
 
-        // Highlight matching DM codes
-        const matchingTexts = Array.from(svgElement.querySelectorAll("text, tspan")).filter(txt =>
-  txt.textContent.includes(dmCode)
-);
-
-        matchingTexts.forEach(txt => {
-          let visible = true;
-          const interval = setInterval(() => {
-            txt.style.fill = visible ? "red" : "";
-            txt.style.stroke = visible ? "black" : "";
-            txt.style.strokeWidth = visible ? "1px" : "";
-            txt.style.filter = visible ? "drop-shadow(0 0 2px yellow)" : "";
-            visible = !visible;
-          }, 500);
-          blinkIntervals.push(interval);
-        });
-      });
-    });
-  });
+  // Match formats like "1. Sulfidation", "1 Sulfidation", or "Sulfidation"
+  if (
+    rawText.startsWith(dmText + ".") ||
+    rawText.startsWith(dmText + " ") ||
+    rawText === dmText
+  ) {
+    let visible = true;
+    const interval = setInterval(() => {
+      txt.style.fill = visible ? "red" : "#00ffff";
+      txt.style.stroke = visible ? "#00ffff" : "red";
+      txt.style.strokeWidth = "2px";
+      txt.style.filter = `drop-shadow(0 0 6px ${visible ? "#00ffff" : "red"}) drop-shadow(0 0 12px ${visible ? "red" : "#00ffff"})`;
+      visible = !visible;
+    }, 500);
+    blinkIntervals.push(interval);
+  }
+});
 
 // ✅ Open modal popup
 function openModal() {
