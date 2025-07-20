@@ -6,7 +6,6 @@ fetch("HCU-Model-Final.svg")
   .then(data => {
     document.getElementById("svgContainer").innerHTML = data;
 
-    // ✅ Ensure SVG is fully visible and responsive
     const svgElement = document.querySelector("#svgContainer svg");
     svgElement.style.width = "100%";
     svgElement.style.height = "auto";
@@ -17,35 +16,16 @@ fetch("HCU-Model-Final.svg")
     const dmListItems = document.querySelectorAll("#dm-list li");
     let blinkIntervals = [];
 
-    // Set viewBox if missing
-    if (!svgRoot.getAttribute("viewBox")) {
+    // ✅ SAFELY set viewBox
+    if (!svgRoot.hasAttribute("viewBox")) {
       const vb = svgRoot.getBBox();
       svgRoot.setAttribute("viewBox", `${vb.x} ${vb.y} ${vb.width} ${vb.height}`);
     }
 
+    // ✅ Get viewBox after setting it
     const viewBox = svgRoot.viewBox.baseVal;
 
-    // Click on DM item
-    dmListItems.forEach(item => {
-      item.addEventListener("click", () => {
-        const dmCode = item.getAttribute("data-dm").trim();
-        selectedDMCode = dmCode;
-        document.getElementById("showDetailsMsg").style.display = "inline-block";
-
-        // Stop previous blinks
-        blinkIntervals.forEach(interval => clearInterval(interval));
-        blinkIntervals = [];
-
-        svgRoot.querySelectorAll("text, tspan").forEach(txt => {
-          txt.style.fill = "";
-          txt.style.stroke = "";
-          txt.style.strokeWidth = "";
-          txt.style.filter = "";
-        });
-      });
-    });
-
-    // ✅ Pan and zoom logic — moved inside
+    // ✅ Pan & Zoom
     let isPanning = false, startX, startY;
 
     svgRoot.addEventListener("mousedown", (e) => {
@@ -74,8 +54,34 @@ fetch("HCU-Model-Final.svg")
       e.preventDefault();
       const zoomFactor = 1.1;
       const scale = e.deltaY < 0 ? 1 / zoomFactor : zoomFactor;
+      const mx = e.offsetX / svgRoot.clientWidth;
+      const my = e.offsetY / svgRoot.clientHeight;
+      const wx = viewBox.x + mx * viewBox.width;
+      const wy = viewBox.y + my * viewBox.height;
+
       viewBox.width *= scale;
       viewBox.height *= scale;
+      viewBox.x = wx - mx * viewBox.width;
+      viewBox.y = wy - my * viewBox.height;
+    });
+
+    // ✅ Click on DM item
+    dmListItems.forEach(item => {
+      item.addEventListener("click", () => {
+        const dmCode = item.getAttribute("data-dm").trim();
+        selectedDMCode = dmCode;
+        document.getElementById("showDetailsMsg").style.display = "inline-block";
+
+        blinkIntervals.forEach(interval => clearInterval(interval));
+        blinkIntervals = [];
+
+        svgRoot.querySelectorAll("text, tspan").forEach(txt => {
+          txt.style.fill = "";
+          txt.style.stroke = "";
+          txt.style.strokeWidth = "";
+          txt.style.filter = "";
+        });
+      });
     });
   });
 
@@ -95,17 +101,21 @@ function closeModal() {
 
 // Tab layout
 const createTabs = (dmData) => {
-  const tabTitles = [
-    "description", "affectedUnits", "mitigation",
-    "inspection", "appearance", "criticalFactors", "temperatureComparison"
-  ];
+ const tabTitles = [
+  "description",
+  "affectedUnits",
+  "mitigation",
+  "inspection",
+  "appearance",
+  "criticalFactors",
+  "temperatureComparison"
+];
 
-  const container = document.createElement("div");
-  container.style.padding = "10px";
-  container.style.display = "flex";
-  container.style.flexDirection = "column";
-  container.style.height = "calc(100vh - 100px)"; // full screen minus header/button space
-
+const container = document.createElement("div");
+container.style.padding = "10px";
+container.style.display = "flex";
+container.style.flexDirection = "column";
+container.style.height = "calc(100vh - 100px)";
   const tabHeader = document.createElement("ul");
   tabHeader.style.display = "flex";
   tabHeader.style.listStyle = "none";
