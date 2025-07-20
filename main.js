@@ -11,18 +11,20 @@ fetch("HCU-Model-Final.svg")
     svgElement.style.height = "auto";
     svgElement.style.overflow = "visible";
     svgElement.style.maxWidth = "none";
+    svgElement.style.cursor = "grab";
 
     const svgRoot = svgElement;
     const dmListItems = document.querySelectorAll("#dm-list li");
     let blinkIntervals = [];
 
-    // ✅ SAFELY set viewBox
+    // ✅ SAFELY set viewBox (with fallback delay)
     if (!svgRoot.hasAttribute("viewBox")) {
-      const vb = svgRoot.getBBox();
-      svgRoot.setAttribute("viewBox", `${vb.x} ${vb.y} ${vb.width} ${vb.height}`);
+      setTimeout(() => {
+        const vb = svgRoot.getBBox();
+        svgRoot.setAttribute("viewBox", `${vb.x} ${vb.y} ${vb.width} ${vb.height}`);
+      }, 100);
     }
 
-    // ✅ Get viewBox after setting it
     const viewBox = svgRoot.viewBox.baseVal;
 
     // ✅ Pan & Zoom
@@ -61,6 +63,11 @@ fetch("HCU-Model-Final.svg")
 
       viewBox.width *= scale;
       viewBox.height *= scale;
+
+      // Optional: limit zoom level
+      viewBox.width = Math.max(100, Math.min(10000, viewBox.width));
+      viewBox.height = Math.max(100, Math.min(10000, viewBox.height));
+
       viewBox.x = wx - mx * viewBox.width;
       viewBox.y = wy - my * viewBox.height;
     });
@@ -101,21 +108,22 @@ function closeModal() {
 
 // Tab layout
 const createTabs = (dmData) => {
- const tabTitles = [
-  "description",
-  "affectedUnits",
-  "mitigation",
-  "inspection",
-  "appearance",
-  "criticalFactors",
-  "temperatureComparison"
-];
+  const tabTitles = [
+    "description",
+    "affectedUnits",
+    "mitigation",
+    "inspection",
+    "appearance",
+    "criticalFactors",
+    "temperatureComparison"
+  ];
 
-const container = document.createElement("div");
-container.style.padding = "10px";
-container.style.display = "flex";
-container.style.flexDirection = "column";
-container.style.height = "calc(100vh - 100px)";
+  const container = document.createElement("div");
+  container.style.padding = "10px";
+  container.style.display = "flex";
+  container.style.flexDirection = "column";
+  container.style.height = "calc(100vh - 100px)";
+
   const tabHeader = document.createElement("ul");
   tabHeader.style.display = "flex";
   tabHeader.style.listStyle = "none";
@@ -136,7 +144,7 @@ container.style.height = "calc(100vh - 100px)";
 
   let firstTabLoaded = false;
 
-  tabTitles.forEach((key, i) => {
+  tabTitles.forEach((key) => {
     if (!dmData[key]) return;
 
     const tab = document.createElement("li");
@@ -187,7 +195,6 @@ const showPopup = (dmId) => {
     return;
   }
 
-  // Remove existing popup
   const existingPopup = document.getElementById("customPopup");
   if (existingPopup) existingPopup.remove();
 
@@ -209,7 +216,6 @@ const showPopup = (dmId) => {
   popup.style.borderRadius = "10px";
   popup.style.boxSizing = "border-box";
 
-  // Close button
   const closeBtn = document.createElement("span");
   closeBtn.textContent = "✖";
   closeBtn.style.position = "absolute";
@@ -224,7 +230,6 @@ const showPopup = (dmId) => {
   const title = document.createElement("h2");
   title.textContent = dmData.name;
 
-  // ✅ Use your tabbed layout instead of static HTML
   const tabs = createTabs(dmData);
 
   popup.appendChild(closeBtn);
