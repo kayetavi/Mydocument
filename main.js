@@ -185,7 +185,7 @@ const showPopup = (dmId) => {
     return;
   }
 
-  // Remove any existing popup
+  // Remove existing popup
   const existingPopup = document.getElementById("customPopup");
   if (existingPopup) existingPopup.remove();
 
@@ -219,21 +219,15 @@ const showPopup = (dmId) => {
   closeBtn.title = "Close";
   closeBtn.onclick = () => popup.remove();
 
-  // Content
   const title = document.createElement("h2");
   title.textContent = dmData.name;
 
-  const description = document.createElement("div");
-  description.innerHTML = `
-    <h3>Description</h3>${dmData.description}
-    <h3>Affected Units</h3>${dmData.affectedUnits}
-    <h3>Mitigation</h3>${dmData.mitigation}
-    <h3>Inspection</h3>${dmData.inspection}
-  `;
+  // ✅ Use your tabbed layout instead of static HTML
+  const tabs = createTabs(dmData);
 
   popup.appendChild(closeBtn);
   popup.appendChild(title);
-  popup.appendChild(description);
+  popup.appendChild(tabs);
 
   document.body.appendChild(popup);
 };
