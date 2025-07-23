@@ -1,7 +1,7 @@
 let selectedDMCode = null;
 
 // Load the SVG and bind interaction logic
-fetch("HCU-Model-Final.svg")
+fetch("CDU/VDU.svg")
   .then(res => res.text())
   .then(data => {
     document.getElementById("svgContainer").innerHTML = data;
