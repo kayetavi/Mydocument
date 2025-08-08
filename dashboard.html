@@ -38,25 +38,35 @@ document.getElementById("uploadForm").addEventListener("submit", async function(
     const formData = new FormData();
     formData.append("file", fileInput.files[0]);
 
-    document.getElementById("output").textContent = "Extracting text... please wait.";
+    const outputEl = document.getElementById("output");
+    outputEl.textContent = "⏳ Extracting text from PDF... please wait.";
 
     try {
-        const res = await fetch("/api/extract", { method: "POST", body: formData });
+        const res = await fetch("/api/extract", {
+            method: "POST",
+            body: formData
+        });
+
+        const contentType = res.headers.get("content-type");
         if (!res.ok) {
-            const errData = await res.json();
-            throw new Error(errData.error || "Failed to extract PDF");
+            let errorMsg = "Failed to extract PDF.";
+            if (contentType && contentType.includes("application/json")) {
+                const errData = await res.json();
+                errorMsg = errData.error || errorMsg;
+            }
+            throw new Error(errorMsg);
         }
 
         const data = await res.json();
         let textOutput = "";
         data.pages.forEach(p => {
-            textOutput += `---- Page ${p.page} ----\n${p.text}\n\n`;
+            textOutput += `---- Page ${p.page} ----\n${p.text.trim()}\n\n`;
         });
 
-        document.getElementById("output").textContent = textOutput || "No text found in this PDF.";
+        outputEl.textContent = textOutput || "No text found in this PDF.";
 
     } catch (err) {
-        document.getElementById("output").textContent = "Error: " + err.message;
+        outputEl.textContent = "❌ Error: " + err.message;
     }
 });
 </script>
