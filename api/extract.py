@@ -1,25 +1,20 @@
+# api/extract.py
 import pdfplumber
 import io
 import json
-from werkzeug.datastructures import FileStorage
-from werkzeug.formparser import parse_form_data
 
 def handler(request):
+    if request.method != "POST":
+        return (json.dumps({"error": "Only POST method allowed"}), 405, {"Content-Type": "application/json"})
+
     try:
-        if request.method != "POST":
-            return (405, {"Content-Type": "application/json"}, json.dumps({"error": "Only POST allowed"}))
-
-        # Parse form-data (file upload)
-        _, form, files = parse_form_data(request.environ, silent=False)
-        uploaded_file = files.get("file")
-
+        uploaded_file = request.files.get("file")
         if not uploaded_file:
-            return (400, {"Content-Type": "application/json"}, json.dumps({"error": "No file uploaded"}))
+            return (json.dumps({"error": "No file uploaded"}), 400, {"Content-Type": "application/json"})
 
         if not uploaded_file.filename.lower().endswith(".pdf"):
-            return (400, {"Content-Type": "application/json"}, json.dumps({"error": "Only PDF files allowed"}))
+            return (json.dumps({"error": "Only PDF files allowed"}), 400, {"Content-Type": "application/json"})
 
-        # Read and extract PDF text
         content = uploaded_file.read()
         pages = []
         with pdfplumber.open(io.BytesIO(content)) as pdf:
@@ -27,7 +22,7 @@ def handler(request):
                 text = page.extract_text() or ""
                 pages.append({"page": i, "text": text})
 
-        return (200, {"Content-Type": "application/json"}, json.dumps({"pages": pages}, ensure_ascii=False))
+        return (json.dumps({"pages": pages}), 200, {"Content-Type": "application/json"})
 
     except Exception as e:
-        return (500, {"Content-Type": "application/json"}, json.dumps({"error": str(e)}))
+        return (json.dumps({"error": str(e)}), 500, {"Content-Type": "application/json"})
