@@ -1,316 +1,65 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>PDF Table-aware Extractor (Local)</title>
-<style>
-/* Unique styles scoped to this app */
-#pdfExtractorApp {
-  font-family: Arial, sans-serif;
-  max-width: 980px;
-  margin: 18px auto;
-  padding: 16px;
-  background: #fff;
-  color: #222;
-  box-shadow: 0 0 0 rgba(0,0,0,0);
-}
-#pdfExtractorApp h2 { margin:0 0 12px 0; font-size:20px; }
-#pdfExtractorApp .controls { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:10px; }
-#pdfExtractorApp input[type="file"],
-#pdfExtractorApp select,
-#pdfExtractorApp button {
-  padding:8px 10px; border:1px solid #d0d0d0; border-radius:6px; background:#fafafa;
-}
-#pdfExtractorApp button { cursor:pointer; }
-#pdfExtractorApp button:hover { background:#f0f0f0; }
-#pdfExtractorApp #pdfOutput {
-  white-space: pre-wrap;
-  background:#f7f7f7;
-  padding:12px;
-  border:1px solid #ddd;
-  margin-top:10px;
-  max-height:420px;
-  overflow:auto;
-  font-family: monospace;
-  font-size:13px;
-}
-#pdfExtractorApp #pdfOutput_rendered { margin-top:10px; }
-#pdfExtractorApp #status { margin-top:8px; font-size:13px; color:#555; }
-table.__extracted { border-collapse:collapse; font-family:monospace; font-size:13px; }
-table.__extracted td { border:1px solid #bbb; padding:6px 8px; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Raw Data Extractor</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f4f4f4; }
+        h1 { color: #333; }
+        form { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        button { background: #4CAF50; color: white; border: none; padding: 8px 14px; cursor: pointer; border-radius: 5px; }
+        button:hover { background: #45a049; }
+        pre { background: #fff; padding: 15px; border-radius: 8px; max-height: 500px; overflow-y: auto; white-space: pre-wrap; }
+    </style>
 </head>
 <body>
-<div id="pdfExtractorApp">
-  <h2>📄 PDF Table-aware Extractor</h2>
 
-  <div class="controls">
-    <input id="pdfInput" type="file" accept="application/pdf" />
-    <select id="exportFormat">
-      <option value="html">View Only</option>
-      <option value="csv">CSV (.csv)</option>
-      <option value="word">Word (.doc)</option>
-      <option value="excel">Excel (.xls)</option>
-      <option value="txt">Text (.txt)</option>
-    </select>
-    <button onclick="uploadPDF_TableAware()">Upload & Extract</button>
-    <button onclick="clearAll()">Clear</button>
-  </div>
+<h1>PDF Raw Data Extractor</h1>
 
-  <div id="status">Ready.</div>
+<form id="uploadForm">
+    <input type="file" id="pdfFile" accept="application/pdf" required />
+    <br><br>
+    <button type="submit">Upload & Extract</button>
+</form>
 
-  <pre id="pdfOutput" aria-live="polite"></pre>
-  <div id="pdfOutput_rendered"></div>
-</div>
-
-<!-- pdf.js (library & worker) -->
-<script>
-/* Minimal local-ready HTML that loads pdf.js then runs the table-aware extractor.
-   Uses pdf.js version 4.2.67 from unpkg. Works when opened locally in browser.
-*/
-(function(){
-  // Preload the pdf.js script tag (script may be appended again inside function if missing)
-  const u = "https://unpkg.com/pdfjs-dist@4.2.67/build/pdf.min.js";
-  if (!document.querySelector('script[src="' + u + '"]')) {
-    const s = document.createElement('script');
-    s.src = u;
-    s.async = false;
-    document.head.appendChild(s);
-  }
-})();
-</script>
+<pre id="output">Upload a PDF file to see the extracted text here...</pre>
 
 <script>
-/* ---------- Utility & Core functions (table-aware parser) ---------- */
+document.getElementById("uploadForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
 
-function setStatus(msg){
-  const st = document.getElementById('status');
-  if(st) st.textContent = msg;
-}
-
-function clusterXPositions(xs, threshold = 12){
-  if(!xs || !xs.length) return [];
-  xs = Array.from(new Set(xs)).sort((a,b)=>a-b);
-  const clusters = [];
-  let cur = { sum: xs[0], count: 1, min: xs[0], max: xs[0] };
-  for(let i=1;i<xs.length;i++){
-    const x = xs[i];
-    if(x - cur.max <= threshold){
-      cur.sum += x; cur.count++; cur.max = x;
-    } else {
-      clusters.push(cur.sum / cur.count);
-      cur = { sum: x, count: 1, min: x, max: x };
-    }
-  }
-  clusters.push(cur.sum / cur.count);
-  return clusters;
-}
-
-function nearestColumnIndex(x, centers){
-  if(!centers || !centers.length) return 0;
-  let best = 0, bestD = Math.abs(x - centers[0]);
-  for(let i=1;i<centers.length;i++){
-    const d = Math.abs(x - centers[i]);
-    if(d < bestD){ bestD = d; best = i; }
-  }
-  return best;
-}
-
-function escapeHtml(s){
-  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-}
-
-function tableRowsToCSV(rows){
-  const maxCols = rows.reduce((m,r)=>Math.max(m, r.length), 0);
-  return rows.map(r=>{
-    const padded = r.slice();
-    while(padded.length < maxCols) padded.push("");
-    return padded.map(c => `"${String(c).replace(/"/g,'""')}"`).join(",");
-  }).join("\r\n");
-}
-
-function tableRowsToHTMLTable(rows){
-  const maxCols = rows.reduce((m,r)=>Math.max(m, r.length), 0);
-  let html = "<table class='__extracted'>";
-  for(const r of rows){
-    html += "<tr>";
-    for(let c=0;c<maxCols;c++){
-      const val = r[c] || "";
-      html += `<td>${escapeHtml(val)}</td>`;
-    }
-    html += "</tr>";
-  }
-  html += "</table>";
-  return html;
-}
-
-function downloadBlob(blob, filename){
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(a.href);
-}
-
-/* ---------- Parse textContent.items into table rows ---------- */
-function parsePageItemsToTable(items){
-  const nodes = [];
-  for(const it of items){
-    const tr = it.transform || [];
-    const x = (typeof tr[4] === 'number') ? tr[4] : 0;
-    const y = (typeof tr[5] === 'number') ? tr[5] : 0;
-    const str = (it.str || "").trim();
-    if(!str) continue;
-    nodes.push({ x: +x.toFixed(2), y: +y.toFixed(2), str });
-  }
-  if(!nodes.length) return { rows: [], centers: [] };
-
-  const lineMap = new Map();
-  for(const n of nodes){
-    const ry = Math.round(n.y);
-    if(!lineMap.has(ry)) lineMap.set(ry, []);
-    lineMap.get(ry).push(n);
-  }
-  const ys = Array.from(lineMap.keys()).sort((a,b)=>b-a);
-  const allXs = [];
-  for(const y of ys){
-    const row = lineMap.get(y);
-    for(const it of row) allXs.push(it.x);
-  }
-  const colCenters = clusterXPositions(allXs, 14);
-  const rows = [];
-  for(const y of ys){
-    const row = lineMap.get(y).slice().sort((a,b)=>a.x-b.x);
-    const cells = new Array(Math.max(1, colCenters.length)).fill(null).map(()=>[]);
-    for(const it of row){
-      if(colCenters.length === 0){
-        cells[0].push(it.str);
-      } else {
-        const idx = nearestColumnIndex(it.x, colCenters);
-        cells[idx].push(it.str);
-      }
-    }
-    const finalCells = cells.map(ca => ca.join(" ").trim());
-    rows.push(finalCells);
-  }
-  return { rows, centers: colCenters };
-}
-
-/* ---------- Main: Upload & parse (table-aware) ---------- */
-async function uploadPDF_TableAware(){
-  const input = document.getElementById('pdfInput');
-  const outPre = document.getElementById('pdfOutput');
-  const renderedDiv = document.getElementById('pdfOutput_rendered');
-  const exportType = (document.getElementById('exportFormat')||{}).value || 'html';
-
-  if(!input || !outPre){ alert("Missing UI elements."); return; }
-  if(!input.files || !input.files.length){ alert("Select a PDF file first."); return; }
-
-  const file = input.files[0];
-  setStatus("Reading file...");
-  outPre.textContent = "";
-  if(renderedDiv) renderedDiv.innerHTML = "";
-
-  try {
-    const arrayBuffer = await file.arrayBuffer();
-
-    // ensure pdfjs loaded
-    if(!window.pdfjsLib){
-      setStatus("Loading pdf.js library...");
-      await new Promise((res, rej)=>{
-        const s = document.createElement('script');
-        s.src = "https://unpkg.com/pdfjs-dist@4.2.67/build/pdf.min.js";
-        s.onload = res;
-        s.onerror = rej;
-        document.head.appendChild(s);
-      });
-    }
-    pdfjsLib.GlobalWorkerOptions.workerSrc = "https://unpkg.com/pdfjs-dist@4.2.67/build/pdf.worker.min.js";
-
-    setStatus("Parsing PDF...");
-    const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
-    const pagesTables = [];
-
-    for(let p=1; p<=pdf.numPages; p++){
-      setStatus(`Extracting page ${p} / ${pdf.numPages} ...`);
-      const page = await pdf.getPage(p);
-      const textContent = await page.getTextContent({ normalizeWhitespace:false });
-      const { rows, centers } = parsePageItemsToTable(textContent.items || []);
-      pagesTables.push({ page: p, rows, centers });
-
-      // live preview in pre
-      outPre.textContent += `--- Page ${p} ---\n`;
-      if(rows.length === 0) outPre.textContent += "(no text found)\n\n";
-      else {
-        for(const r of rows) outPre.textContent += r.join(" | ") + "\n";
-        outPre.textContent += "\n";
-      }
+    const fileInput = document.getElementById("pdfFile");
+    if (!fileInput.files.length) {
+        alert("Please select a PDF file first!");
+        return;
     }
 
-    setStatus("Extraction complete.");
+    const formData = new FormData();
+    formData.append("file", fileInput.files[0]);
 
-    // handle export/render
-    if(exportType === 'html'){
-      let combined = "";
-      for(const pg of pagesTables){
-        combined += `<h3>Page ${pg.page}</h3>`;
-        combined += tableRowsToHTMLTable(pg.rows);
-        combined += "<br/>";
-      }
-      if(renderedDiv) renderedDiv.innerHTML = combined;
-    } else if(exportType === 'csv'){
-      const allRows = [];
-      for(const pg of pagesTables){
-        allRows.push([`Page ${pg.page}`]);
-        for(const r of pg.rows) allRows.push(r);
-      }
-      const csv = tableRowsToCSV(allRows);
-      downloadBlob(new Blob([csv], { type: 'text/csv;charset=utf-8' }), (file.name.replace(/\.[^/.]+$/, "") || "extracted") + ".csv");
-    } else if(exportType === 'txt'){
-      const txt = pagesTables.map(pg => {
-        if(!pg.rows.length) return `--- Page ${pg.page} ---\n(no text)\n\n`;
-        return `--- Page ${pg.page} ---\n` + pg.rows.map(r => r.join("\t")).join("\n") + "\n\n";
-      }).join("\n");
-      downloadBlob(new Blob([txt], { type: 'text/plain;charset=utf-8' }), (file.name.replace(/\.[^/.]+$/, "") || "extracted") + ".txt");
-    } else if(exportType === 'word'){
-      let doc = "<html><head><meta charset='utf-8'></head><body>";
-      for(const pg of pagesTables){
-        doc += `<h3>Page ${pg.page}</h3>` + tableRowsToHTMLTable(pg.rows) + "<br/>";
-      }
-      doc += "</body></html>";
-      downloadBlob(new Blob([doc], { type: 'application/msword' }), (file.name.replace(/\.[^/.]+$/, "") || "extracted") + ".doc");
-    } else if(exportType === 'excel'){
-      let doc = "<html><head><meta charset='utf-8'></head><body>";
-      for(const pg of pagesTables){
-        doc += `<h3>Page ${pg.page}</h3>` + tableRowsToHTMLTable(pg.rows) + "<br/>";
-      }
-      doc += "</body></html>";
-      downloadBlob(new Blob([doc], { type: 'application/vnd.ms-excel' }), (file.name.replace(/\.[^/.]+$/, "") || "extracted") + ".xls");
+    document.getElementById("output").textContent = "Extracting text... please wait.";
+
+    try {
+        const res = await fetch("/api/extract", { method: "POST", body: formData });
+        if (!res.ok) {
+            const errData = await res.json();
+            throw new Error(errData.error || "Failed to extract PDF");
+        }
+
+        const data = await res.json();
+        let textOutput = "";
+        data.pages.forEach(p => {
+            textOutput += `---- Page ${p.page} ----\n${p.text}\n\n`;
+        });
+
+        document.getElementById("output").textContent = textOutput || "No text found in this PDF.";
+
+    } catch (err) {
+        document.getElementById("output").textContent = "Error: " + err.message;
     }
-
-  } catch(err){
-    console.error(err);
-    setStatus("Error: " + (err && err.message ? err.message : "unknown"));
-    alert("Extraction failed. See console for details.");
-  }
-}
-
-/* Clear helper */
-function clearAll(){
-  const input = document.getElementById('pdfInput');
-  const out = document.getElementById('pdfOutput');
-  const rend = document.getElementById('pdfOutput_rendered');
-  if(input) input.value = "";
-  if(out) out.textContent = "";
-  if(rend) rend.innerHTML = "";
-  setStatus("Cleared.");
-}
-
-/* Expose function name used by button in this file */
-window.uploadPDF_TableAware = uploadPDF_TableAware;
+});
 </script>
+
 </body>
 </html>
