@@ -5,21 +5,67 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PDF Raw Data Extractor</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; background: #f4f4f4; }
-        h1 { color: #333; }
-        form { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        button { background: #4CAF50; color: white; border: none; padding: 8px 14px; cursor: pointer; border-radius: 5px; }
-        button:hover { background: #45a049; }
-        pre { background: #fff; padding: 15px; border-radius: 8px; max-height: 500px; overflow-y: auto; white-space: pre-wrap; }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f4f4f4;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        form {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        pre {
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            max-height: 500px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+            border: 1px solid #ddd;
+        }
+        #output {
+            max-width: 900px;
+            margin: auto;
+        }
+        .loading {
+            color: #888;
+            font-style: italic;
+        }
+        input[type="file"] {
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
 
-<h1>PDF Raw Data Extractor</h1>
+<h1>📄 PDF Raw Data Extractor</h1>
 
 <form id="uploadForm">
     <input type="file" id="pdfFile" accept="application/pdf" required />
-    <br><br>
+    <br>
     <button type="submit">Upload & Extract</button>
 </form>
 
@@ -30,16 +76,24 @@ document.getElementById("uploadForm").addEventListener("submit", async function(
     e.preventDefault();
 
     const fileInput = document.getElementById("pdfFile");
+    const outputEl = document.getElementById("output");
+
     if (!fileInput.files.length) {
-        alert("Please select a PDF file first!");
+        alert("⚠ Please select a PDF file first!");
+        return;
+    }
+
+    const file = fileInput.files[0];
+    if (file.type !== "application/pdf") {
+        alert("❌ Only PDF files are allowed!");
         return;
     }
 
     const formData = new FormData();
-    formData.append("file", fileInput.files[0]);
+    formData.append("file", file);
 
-    const outputEl = document.getElementById("output");
     outputEl.textContent = "⏳ Extracting text from PDF... please wait.";
+    outputEl.classList.add("loading");
 
     try {
         const res = await fetch("/api/extract", {
@@ -48,8 +102,9 @@ document.getElementById("uploadForm").addEventListener("submit", async function(
         });
 
         const contentType = res.headers.get("content-type");
+
         if (!res.ok) {
-            let errorMsg = "Failed to extract PDF.";
+            let errorMsg = "❌ Failed to extract PDF.";
             if (contentType && contentType.includes("application/json")) {
                 const errData = await res.json();
                 errorMsg = errData.error || errorMsg;
@@ -63,10 +118,11 @@ document.getElementById("uploadForm").addEventListener("submit", async function(
             textOutput += `---- Page ${p.page} ----\n${p.text.trim()}\n\n`;
         });
 
-        outputEl.textContent = textOutput || "No text found in this PDF.";
-
+        outputEl.textContent = textOutput || "⚠ No text found in this PDF.";
     } catch (err) {
         outputEl.textContent = "❌ Error: " + err.message;
+    } finally {
+        outputEl.classList.remove("loading");
     }
 });
 </script>
