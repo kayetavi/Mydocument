@@ -1,13 +1,18 @@
 import pdfplumber
 import io
 import json
+from werkzeug.datastructures import FileStorage
+from werkzeug.formparser import parse_form_data
 
 def handler(request):
     try:
         if request.method != "POST":
             return (405, {"Content-Type": "application/json"}, json.dumps({"error": "Only POST allowed"}))
 
-        uploaded_file = request.files.get("file")
+        # Parse form-data (file upload)
+        _, form, files = parse_form_data(request.environ, silent=False)
+        uploaded_file = files.get("file")
+
         if not uploaded_file:
             return (400, {"Content-Type": "application/json"}, json.dumps({"error": "No file uploaded"}))
 
