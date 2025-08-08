@@ -7,7 +7,6 @@ def handler(request):
         if request.method != "POST":
             return (405, {"Content-Type": "application/json"}, json.dumps({"error": "Only POST allowed"}))
 
-        # Uploaded file lena
         uploaded_file = request.files.get("file")
         if not uploaded_file:
             return (400, {"Content-Type": "application/json"}, json.dumps({"error": "No file uploaded"}))
@@ -15,7 +14,7 @@ def handler(request):
         if not uploaded_file.filename.lower().endswith(".pdf"):
             return (400, {"Content-Type": "application/json"}, json.dumps({"error": "Only PDF files allowed"}))
 
-        # PDF ka text extract karna
+        # Read and extract PDF text
         content = uploaded_file.read()
         pages = []
         with pdfplumber.open(io.BytesIO(content)) as pdf:
